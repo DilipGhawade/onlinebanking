@@ -1,0 +1,126 @@
+:root {
+  --sidebar-width: 260px;
+  --header-height: 60px;
+}
+
+/* Sidebar */
+.sidebar-container {
+  position: fixed;
+  top: 0;
+  left: 0; /* Ensures it starts from the edge */
+  width: var(--sidebar-width);
+  height: 100vh;
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+  z-index: 1050; /* Higher than header and overlay */
+  background-color: white;
+  border-right: 1px solid #dee2e6;
+  transform: translateX(-100%); /* Hidden by default on mobile */
+}
+
+.sidebar-container.open {
+  transform: translateX(0); /* Slides in when open */
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Sidebar overlay on mobile */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease; /* Added visibility transition */
+  z-index: 1040; /* Below sidebar, above other content */
+}
+
+.sidebar-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Mobile Header (from Dashboard.js) - visible only on mobile via d-md-none */
+.mobile-header-layout {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  z-index: 1035; /* Ensure it's above main content, potentially above .app-header if they could overlap, but below sidebar */
+  padding: 0.5rem 1rem; /* Consistent padding */
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* App Header (from Header.js) - hidden on mobile, shown on desktop */
+.app-header {
+  display: none; /* Hidden by default (mobile-first) */
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0; /* Will be overridden for desktop */
+  height: var(--header-height);
+  z-index: 1030;
+  /* Bootstrap classes like bg-white, shadow-sm, px-4, d-flex are on the element for other styling */
+}
+
+/* Main layout adjustments */
+.main-content {
+  padding-top: var(--header-height); /* This pushes the content down below the fixed header */
+  margin-left: 0; /* Default for mobile */
+  padding-bottom: 1rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  min-height: 100vh;
+  background-color: #f8f9fa; /* Light background for the main content */
+}
+
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+}
+
+.dropdown-menu {
+  z-index: 1040; /* Above the fixed header */
+}
+
+/* Responsive adjustments for larger screens (md and up) */
+@media (min-width: 768px) {
+  /* .mobile-header-layout is hidden on desktop by Bootstrap d-md-none */
+
+  .app-header {
+    display: flex; /* Show on desktop, use flex due to Bootstrap classes on the element */
+    left: var(--sidebar-width); /* Position header to the right of the sidebar */
+  }
+
+  .sidebar-container {
+    position: fixed; /* Keep sidebar fixed on desktop */
+    top: 0;
+    left: 0;
+    transform: translateX(0) !important; /* Ensure it's visible and not transformed */
+    /* width, height, z-index, background, border are already set */
+  }
+
+  .sidebar-overlay {
+    display: none !important; /* Hide overlay on desktop */
+  }
+
+  .main-content {
+    margin-left: var(--sidebar-width); /* Make space for the fixed sidebar */
+  }
+
+  /* Hides the mobile-specific sidebar toggle button on larger screens if it's part of .sidebar-container */
+  .sidebar-container .btn.d-md-none {
+    display: none !important; /* Bootstrap d-md-none should handle this, but being explicit can help */
+  }
+}
+
+/* Hide the desktop header on mobile */
+@media (max-width: 767.98px) {
+  .app-header {
+    display: none !important;
+  }
+}
