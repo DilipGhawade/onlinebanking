@@ -79,10 +79,10 @@ export function CreditCardsPage() {
   const spendingTotal = spendingCategories.reduce((sum, cat) => sum + parseInt(cat.amount.replace(/[^0-9]/g, '')), 0);
 
   return (
-    <Container fluid className="p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4>My Cards</h4>
-        <Button variant="primary" size="sm">
+    <Container fluid className="p-3 p-md-4">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <h4 className="mb-3 mb-md-0">My Cards</h4>
+        <Button variant="primary" size="sm" className="d-flex align-items-center">
           <FiPlus className="me-1" /> Add New Card
         </Button>
       </div>
@@ -91,14 +91,24 @@ export function CreditCardsPage() {
       <div className="position-relative mb-4">
         <div 
           ref={scrollRef}
-          className="d-flex overflow-hidden"
-          style={{ scrollSnapType: 'x mandatory', scrollPadding: '0 16px', gap: `${gap}px`, padding: '16px 0' }}
+          className="d-flex overflow-auto hide-scrollbar"
+          style={{ 
+            scrollSnapType: 'x mandatory', 
+            scrollPadding: '0 16px', 
+            gap: `${gap}px`, 
+            padding: '16px 0',
+            msOverflowStyle: 'none',
+            scrollbarWidth: 'none'
+          }}
         >
           {cards.map((card, index) => (
             <div 
               key={card.id} 
               className="flex-shrink-0"
-              style={{ width: `${cardWidth}px`, scrollSnapAlign: 'start' }}
+              style={{ 
+                width: `${window.innerWidth < 400 ? window.innerWidth - 40 : 300}px`, 
+                scrollSnapAlign: 'start' 
+              }}
               onClick={() => handleCardClick(index)}
             >
               <Card 
@@ -107,25 +117,29 @@ export function CreditCardsPage() {
                   background: `linear-gradient(135deg, ${card.bg} 0%, ${card.bg}99 100%)`,
                   borderRadius: '20px',
                   transition: 'all 0.3s ease',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  minHeight: '180px'
                 }}
               >
-                <Card.Body>
+                <Card.Body className="d-flex flex-column justify-content-between">
                   <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h5 className="mb-0">{card.bank}</h5>
+                    <h5 className="mb-0 text-truncate" style={{maxWidth: '70%'}}>{card.bank}</h5>
                     <div className="bg-white rounded p-1 px-2">
-                      <span className="text-dark fw-bold">{card.type}</span>
+                      <span className="text-dark fw-bold small">{card.type}</span>
                     </div>
                   </div>
-                  <div className="mb-4">
-                    <h4 className="mb-1">{card.number}</h4>
-                    <div className="d-flex justify-content-between align-items-center">
-                      <small>Card Holder</small>
-                      <small>Expires</small>
-                    </div>
-                    <div className="d-flex justify-content-between align-items-center">
-                      <h6 className="mb-0">{card.holder}</h6>
-                      <h6 className="mb-0">{card.expiry}</h6>
+                  <div>
+                    <h6 className="mb-2 small text-muted">Card Number</h6>
+                    <h4 className="mb-3 fw-bold">{card.number}</h4>
+                    <div className="d-flex justify-content-between">
+                      <div>
+                        <div className="small text-muted">Card Holder</div>
+                        <div className="fw-medium">{card.holder}</div>
+                      </div>
+                      <div className="text-end">
+                        <div className="small text-muted">Expires</div>
+                        <div className="fw-medium">{card.expiry}</div>
+                      </div>
                     </div>
                   </div>
                 </Card.Body>
@@ -136,15 +150,17 @@ export function CreditCardsPage() {
         
         <button 
           onClick={() => scroll('left')}
-          className="position-absolute start-0 top-50 translate-middle-y btn btn-light rounded-circle shadow-sm"
+          className="position-absolute start-0 top-50 translate-middle-y btn btn-light rounded-circle shadow-sm d-none d-md-flex"
           style={{ width: '36px', height: '36px', zIndex: 10 }}
+          aria-label="Previous card"
         >
           &lt;
         </button>
         <button 
           onClick={() => scroll('right')}
-          className="position-absolute end-0 top-50 translate-middle-y btn btn-light rounded-circle shadow-sm"
+          className="position-absolute end-0 top-50 translate-middle-y btn btn-light rounded-circle shadow-sm d-none d-md-flex"
           style={{ width: '36px', height: '36px', zIndex: 10 }}
+          aria-label="Next card"
         >
           &gt;
         </button>
@@ -152,7 +168,7 @@ export function CreditCardsPage() {
 
       <Row className="g-4">
         {/* Card Summary */}
-        <Col md={4}>
+        <Col xs={12} lg={4}>
           <Card className="h-100 border-0 shadow-sm">
             <Card.Body>
               <h6 className="text-muted mb-3">Card Summary</h6>
@@ -194,74 +210,48 @@ export function CreditCardsPage() {
           </Card>
         </Col>
 
-        {/* Spending Statistics */}
-        <Col md={4}>
-          <Card className="h-100 border-0 shadow-sm">
-            <Card.Body>
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <h6 className="mb-0">Spending Statistics</h6>
-                <small className="text-muted">Total: ₹{spendingTotal.toLocaleString()}</small>
-              </div>
-              
-              {spendingCategories.map((category, index) => (
-                <div key={index} className="mb-3">
-                  <div className="d-flex justify-content-between mb-1">
-                    <small className="text-muted">{category.name}</small>
-                    <small className="fw-bold">{category.amount}</small>
-                  </div>
-                  <ProgressBar 
-                    now={category.percentage} 
-                    variant={category.color} 
-                    style={{ height: '6px', borderRadius: '3px' }} 
-                  />
-                </div>
-              ))}
-              
-              <div className="mt-4">
-                <div className="d-flex align-items-center justify-content-between mb-2">
-                  <small className="text-muted">Daily Limit</small>
-                  <small className="fw-bold">₹5,000 / ₹25,000</small>
-                </div>
-                <ProgressBar now={20} variant="info" style={{ height: '8px', borderRadius: '4px' }} />
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-
         {/* Recent Transactions */}
-        <Col md={4}>
+        <Col xs={12} lg={8}>
           <Card className="h-100 border-0 shadow-sm">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <h6 className="mb-0">Recent Transactions</h6>
-                <Button variant="link" size="sm" className="p-0">View All</Button>
+                <h6 className="text-muted mb-0">Recent Transactions</h6>
+                <Button variant="link" size="sm" className="text-decoration-none p-0">
+                  View All
+                </Button>
               </div>
-              
-              <div className="d-flex flex-column gap-3">
-                {currentCard.transactions.map((txn) => (
-                  <div key={txn.id} className="d-flex align-items-center">
-                    <div className="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '40px', height: '40px' }}>
-                      {txn.icon}
-                    </div>
-                    <div className="flex-grow-1">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <h6 className="mb-0">{txn.merchant}</h6>
-                        <span className={`fw-bold ${txn.amount.startsWith('-') ? 'text-danger' : 'text-success'}`}>
-                          {txn.amount}
-                        </span>
-                      </div>
-                      <div className="d-flex justify-content-between align-items-center">
-                        <small className="text-muted">{txn.date}</small>
-                        <small className="badge bg-light text-dark">{txn.category}</small>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="table-responsive">
+                <Table hover className="mb-0">
+                  <thead>
+                    <tr>
+                      <th>Merchant</th>
+                      <th>Date</th>
+                      <th className="text-end">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentCard.transactions.map((tx) => (
+                      <tr key={tx.id}>
+                        <td>
+                          <div className="d-flex align-items-center">
+                            <div className="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style={{ width: '32px', height: '32px' }}>
+                              {tx.icon}
+                            </div>
+                            <div>
+                              <div className="fw-medium">{tx.merchant}</div>
+                              <small className="text-muted">{tx.category}</small>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="text-muted">{tx.date}</td>
+                        <td className={`fw-medium text-end ${tx.amount.startsWith('-') ? 'text-danger' : 'text-success'}`}>
+                          {tx.amount}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
               </div>
-              
-              <Button variant="outline-primary" className="w-100 mt-3 d-flex align-items-center justify-content-center">
-                <FiPlus className="me-2" /> Add Money
-              </Button>
             </Card.Body>
           </Card>
         </Col>

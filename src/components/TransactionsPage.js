@@ -1,6 +1,6 @@
 // src/components/TransactionsPage.js
 import React, { useState } from 'react';
-import { Container, Table, Form, Row, Col, Button, Spinner, Alert } from 'react-bootstrap';
+import { Container, Card, Table, Form, Row, Col, Button, Spinner, Alert } from 'react-bootstrap';
 import { FiFilter, FiDownload, FiRefreshCw } from 'react-icons/fi';
 import TransactionRow from './common/TransactionRow';
 import { generatePdf } from '../utils/PdfGenerator';
@@ -234,35 +234,33 @@ const TransactionsPage = () => {
   };
 
   return (
-    <Container fluid className="p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4>Transaction History</h4>
-        <div>
-          <Button 
-            variant="outline-primary" 
-            size="sm" 
-            className="me-2"
-            onClick={() => window.location.reload()}
-          >
-            <FiRefreshCw className="me-1" /> Refresh
-          </Button>
-          <Button 
-            variant="primary" 
-            size="sm" 
-            onClick={handleExportAll}
-            disabled={isExporting || filteredTransactions.length === 0}
-          >
-            {isExporting ? (
-              <>
-                <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-1" />
-                Exporting...
-              </>
-            ) : (
-              <>
-                <FiDownload className="me-1" /> Export All
-              </>
-            )}
-          </Button>
+    <Container fluid className="p-3 p-md-4">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <h4 className="mb-3 mb-md-0">Transaction History</h4>
+        <div className="d-flex flex-column flex-md-row gap-2 w-100 w-md-auto">
+          <div className="d-flex gap-2">
+            <Button 
+              variant="outline-primary" 
+              size="sm" 
+              className="d-flex align-items-center"
+              onClick={handleExportAll}
+              disabled={isExporting}
+            >
+              {isExporting ? (
+                <>
+                  <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-2" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <FiDownload className="me-1" /> Export
+                </>
+              )}
+            </Button>
+            <Button variant="outline-secondary" size="sm" className="d-flex align-items-center">
+              <FiRefreshCw className="me-1" /> Refresh
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -272,108 +270,110 @@ const TransactionsPage = () => {
         </Alert>
       )}
 
-      <div className="bg-white p-3 rounded-3 shadow-sm mb-4">
-        <h5 className="mb-3">
-          <FiFilter className="me-2" /> Filters
-        </h5>
-        <Row>
-          <Col md={3} className="mb-3">
-            <Form.Label>Transaction Type</Form.Label>
-            <Form.Select 
-              name="type" 
-              value={filters.type}
-              onChange={handleFilterChange}
-              size="sm"
-            >
-              <option value="all">All Types</option>
-              <option value="credit">Credit</option>
-              <option value="debit">Debit</option>
-            </Form.Select>
-          </Col>
-          <Col md={3} className="mb-3">
-            <Form.Label>Category</Form.Label>
-            <Form.Select 
-              name="category" 
-              value={filters.category}
-              onChange={handleFilterChange}
-              size="sm"
-            >
-              <option value="all">All Categories</option>
-              <option value="shopping">Shopping</option>
-              <option value="salary">Salary</option>
-              <option value="transfer">Transfer</option>
-              <option value="bills">Bills</option>
-              <option value="food">Food & Dining</option>
-            </Form.Select>
-          </Col>
-          <Col md={2} className="mb-3">
-            <Form.Label>From Date</Form.Label>
-            <Form.Control
-              type="date"
-              name="startDate"
-              value={filters.startDate}
-              onChange={handleFilterChange}
-              size="sm"
-            />
-          </Col>
-          <Col md={2} className="mb-3">
-            <Form.Label>To Date</Form.Label>
-            <Form.Control
-              type="date"
-              name="endDate"
-              value={filters.endDate}
-              onChange={handleFilterChange}
-              size="sm"
-            />
-          </Col>
-          <Col md={2} className="d-flex align-items-end mb-3">
-            <Button 
-              variant="primary" 
-              size="sm" 
-              className="w-100"
-              onClick={() => {
-                // Trigger a re-render to apply filters
-                setFilters({...filters});
-              }}
-            >
-              Apply Filters
-            </Button>
-          </Col>
-        </Row>
-      </div>
+      <Card className="mb-4">
+        <Card.Body className="p-3 p-md-4">
+          <Row className="g-3 mb-4">
+            <Col xs={12} md={6} lg={3}>
+              <Form.Group>
+                <Form.Label className="small text-muted">Transaction Type</Form.Label>
+                <Form.Select 
+                  size="sm" 
+                  name="type" 
+                  value={filters.type}
+                  onChange={handleFilterChange}
+                >
+                  <option value="all">All Types</option>
+                  <option value="credit">Credit</option>
+                  <option value="debit">Debit</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col xs={12} md={6} lg={3}>
+              <Form.Group>
+                <Form.Label className="small text-muted">Category</Form.Label>
+                <Form.Select 
+                  size="sm" 
+                  name="category" 
+                  value={filters.category}
+                  onChange={handleFilterChange}
+                >
+                  <option value="all">All Categories</option>
+                  <option value="shopping">Shopping</option>
+                  <option value="salary">Salary</option>
+                  <option value="bills">Bills</option>
+                  <option value="food">Food</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+            <Col xs={12} sm={6} lg={3}>
+              <Form.Group>
+                <Form.Label className="small text-muted">From Date</Form.Label>
+                <Form.Control 
+                  type="date" 
+                  size="sm" 
+                  name="startDate"
+                  value={filters.startDate}
+                  onChange={handleFilterChange}
+                />
+              </Form.Group>
+            </Col>
+            <Col xs={12} sm={6} lg={3}>
+              <Form.Group>
+                <Form.Label className="small text-muted">To Date</Form.Label>
+                <Form.Control 
+                  type="date" 
+                  size="sm" 
+                  name="endDate"
+                  value={filters.endDate}
+                  onChange={handleFilterChange}
+                  min={filters.startDate}
+                />
+              </Form.Group>
+            </Col>
+          </Row>
 
-      <div className="bg-white rounded-3 shadow-sm overflow-hidden">
-        <div className="table-responsive">
-          <Table hover className="mb-0">
-            <thead className="table-light">
-              <tr>
-                <th>Transaction ID</th>
-                <th>Description</th>
-                <th>Type</th>
-                <th>Date</th>
-                <th>Amount</th>
-                <th>Receipt</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTransactions.length > 0 ? (
-                filteredTransactions.map(transaction => (
-                  <TransactionRow 
-                    key={transaction.id} 
-                    transaction={transaction} 
-                  />
-                ))
-              ) : (
+          <div className="table-responsive">
+            <Table hover className="mb-0">
+              <thead className="table-light">
                 <tr>
-                  <td colSpan="6" className="text-center py-4 text-muted">
-                    No transactions found matching your filters
-                  </td>
+                  <th className="text-nowrap">ID</th>
+                  <th className="text-nowrap">Description</th>
+                  <th className="text-nowrap text-end">Amount</th>
+                  <th className="text-nowrap">Type</th>
+                  <th className="text-nowrap">Date</th>
+                  <th className="text-nowrap">Category</th>
                 </tr>
-              )}
-            </tbody>
-          </Table>
-        </div>
-      </div>
+              </thead>
+              <tbody>
+                {filteredTransactions.length > 0 ? (
+                  filteredTransactions.map((tx) => (
+                    <tr key={tx.id}>
+                      <td className="text-nowrap small">{tx.id}</td>
+                      <td className="text-nowrap">{tx.description}</td>
+                      <td className={`text-nowrap text-end fw-medium ${tx.type === 'credit' ? 'text-success' : 'text-danger'}`}>
+                        {tx.type === 'credit' ? '+' : '-'}{formatCurrency(tx.amount).replace('₹', '')}
+                      </td>
+                      <td>
+                        <span className={`badge bg-${tx.type === 'credit' ? 'success' : 'danger'}-subtle text-${tx.type === 'credit' ? 'success' : 'danger'} text-uppercase`}>
+                          {tx.type}
+                        </span>
+                      </td>
+                      <td className="small text-nowrap">{formatDate(tx.date)}</td>
+                      <td className="text-capitalize small">{tx.category}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="text-center py-4">
+                      <div className="text-muted">No transactions found</div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          </div>
+        </Card.Body>
+      </Card>
     </Container>
   );
 };

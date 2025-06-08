@@ -85,8 +85,8 @@ function Dashboard() {
               <List />
             </button>
             <img 
-              src="/images/banklogo.svg" 
-              alt="BankDash Logo" 
+              src="/images/ab-logo.svg" 
+              alt="Apna Bank Logo" 
               style={{ height: '32px', marginLeft: '10px' }} 
             />
             <h5 className="text-primary fw-bold ms-3 mb-0 d-inline">{active}</h5>
