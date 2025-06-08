@@ -1,3 +1,50 @@
+# Online Banking Application
+
+A modern, responsive web application for online banking services. This application provides a comprehensive banking experience, allowing users to manage accounts, view transactions, track investments, and access various banking services through an intuitive interface.
+
+## Key Features
+
+- **User Authentication**: Secure login system with role-based access control
+- **Dashboard Overview**: Quick view of account balances, recent transactions, and financial status
+- **Account Management**: View and manage multiple bank accounts and credit cards
+- **Transaction History**: Detailed view of all transactions with filtering capabilities
+- **Investment Portfolio**: Track and manage investment accounts and performance
+- **Credit Card Management**: View credit card details, statements, and payment options
+- **Loan Services**: Access loan information, payment schedules, and new loan applications
+- **Responsive Design**: Fully responsive interface that works on desktop, tablet, and mobile devices
+
+## Technologies Used
+
+- **Frontend**: React.js, React Router, Redux
+- **UI Framework**: Bootstrap 5 with custom styling
+- **State Management**: Redux with Redux Toolkit
+- **Authentication**: JWT-based authentication
+- **Icons**: React Bootstrap Icons
+- **Date Handling**: Chrono.js
+- **Build Tools**: Create React App
+
+## Project Structure
+
+```
+src/
+├── app/            # App configuration and store setup
+├── components/     # React components
+│   ├── Dashboard.js      # Main dashboard layout
+│   ├── DashboardPage.js  # Homepage content
+│   ├── Login.js          # Authentication page
+│   ├── AccountsPage.js   # Account management
+│   ├── TransactionsPage.js # Transaction history
+│   └── ...               # Other component pages
+├── features/       # Redux features and slices
+│   └── auth/       # Authentication state management
+├── routes/         # Application routing
+├── styles/         # CSS and styling files
+├── App.js          # Main application component
+└── index.js        # Application entry point
+```
+
+---
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

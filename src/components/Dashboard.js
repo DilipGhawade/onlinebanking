@@ -8,20 +8,19 @@ import Sidebar from "./sidebar";
 import Header from "./Header";
 
 import { DashboardPage } from "./DashboardPage";
-import { TransactionsPage } from "./TransactionsPage";
-import { AccountsPage } from "./AccountsPage";
+import TransactionsPage from "./TransactionsPage";
+
+import AccountsPage from "./AccountsPage";
 import { InvestmentsPage } from "./InvestmentsPage";
 import { CreditCardsPage } from "./CreditCardsPage";
 import { LoansPage } from "./LoansPage";
-import { ServicesPage } from "./ServicesPage";
+import ServicesPage from "./ServicesPage";
 import { SettingPage } from "./SettingPage";
 
 function Dashboard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const currentPath =
-    location.pathname.replace("/dashboard/", "") || "dashboard";
 
   const [active, setActive] = useState("Dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);

@@ -41,10 +41,23 @@ function Sidebar({ active, onSelect, isOpen, toggleSidebar }) {
         }`}
       >
         <div className="d-flex justify-content-between align-items-center mb-4">
-  <span className="d-flex align-items-center" style={{gap: 10}}>
-    <img src="/images/banklogo.svg" alt="BankDash Logo" style={{ height: '32px', marginRight: 0, paddingRight: 0 }} />
-    <h4 className="text-primary fw-bold mb-0 d-inline" style={{marginLeft: 0, paddingLeft: 0}}>Apna Bank</h4>
-  </span>
+          <div className="d-flex align-items-center" style={{ gap: '10px' }}>
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="32" height="32" rx="6" fill="#1e3c72"/>
+              <text 
+                x="50%" 
+                y="50%" 
+                fill="white" 
+                fontSize="14" 
+                fontWeight="bold"
+                textAnchor="middle"
+                dominantBaseline="middle"
+              >
+                AB
+              </text>
+            </svg>
+            <h4 className="text-primary fw-bold mb-0">Apna Bank</h4>
+          </div>
 
           {/* Close button for mobile */}
           <button
