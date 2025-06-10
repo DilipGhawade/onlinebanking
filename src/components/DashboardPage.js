@@ -49,7 +49,7 @@ export function DashboardPage() {
 
   return (
     <div className="container-fluid px-3 px-md-4 py-3">
-      <h4 className="mb-4 fw-bold">Dashboard</h4>
+      {/* <h4 className="mb-4 fw-bold">Dashboard</h4> */}
       
       {/* Summary Cards */}
       <div className="row g-3 mb-4">

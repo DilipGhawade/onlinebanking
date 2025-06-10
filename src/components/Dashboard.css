@@ -1,0 +1,20 @@
+:root {
+    --header-height: 64px; /* Match your header height */
+  }
+  
+  .main-content {
+    padding-top: var(--header-height);
+    margin-left: 0;
+    padding-bottom: 1rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+  }
+  
+  @media (min-width: 768px) {
+    .main-content {
+      margin-left: var(--sidebar-width);
+    }
+  }
+  

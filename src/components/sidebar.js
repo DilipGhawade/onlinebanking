@@ -58,16 +58,6 @@ function Sidebar({ active, onSelect, isOpen, toggleSidebar }) {
             </svg>
             <h4 className="text-primary fw-bold mb-0">Apna Bank</h4>
           </div>
-
-          {/* Close button for mobile */}
-          <button
-            className="btn d-md-none"
-            onClick={toggleSidebar}
-            aria-label="Close sidebar"
-            style={{ fontSize: "1.5rem" }}
-          >
-            <X />
-          </button>
         </div>
 
         <ul className="nav flex-column">

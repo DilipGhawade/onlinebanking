@@ -1,7 +1,7 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const WeeklyActivityChart = () => {
+const WeeklyActivityChart = ({ isMobile }) => {
   // Chart data
   const data = [
     { name: 'Sat', deposit: 480, withdraw: 240 },
@@ -13,11 +13,39 @@ const WeeklyActivityChart = () => {
     { name: 'Fri', deposit: 400, withdraw: 340 },
   ];
 
+  // Format currency for tooltip
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value);
+  };
+
+  // Custom tooltip
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-2 border rounded shadow-sm" style={{ fontSize: '12px' }}>
+          <p className="mb-1 fw-medium">{label}</p>
+          <p className="mb-0" style={{ color: '#4e73df' }}>
+            Deposit: {formatCurrency(payload[0].value)}
+          </p>
+          <p className="mb-0" style={{ color: '#1cc88a' }}>
+            Withdraw: {formatCurrency(payload[1].value)}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="card border-0 shadow-sm h-100">
-      <div className="card-body">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-          <h5 className="mb-0 fw-bold">Weekly Activity</h5>
+      <div className="card-body p-3 p-md-4">
+        <div className="d-flex flex-wrap justify-content-between align-items-center mb-3">
+          <h5 className="mb-2 mb-md-0 fw-bold">Weekly Activity</h5>
           <div className="d-flex">
             <div className="d-flex align-items-center me-3">
               <div className="bg-primary rounded-circle me-2" style={{ width: '10px', height: '10px' }}></div>
@@ -29,18 +57,18 @@ const WeeklyActivityChart = () => {
             </div>
           </div>
         </div>
-        <div style={{ height: '250px' }}>
+        <div style={{ height: isMobile ? '220px' : '250px', width: '100%' }}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
               margin={{
                 top: 5,
-                right: 10,
-                left: -20,
+                right: isMobile ? 5 : 10,
+                left: isMobile ? -15 : -20,
                 bottom: 5,
               }}
-              barGap={4}
-              barCategoryGap="15%"
+              barGap={isMobile ? 2 : 4}
+              barCategoryGap={isMobile ? '10%' : '15%'}
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
               <XAxis 
