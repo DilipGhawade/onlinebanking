@@ -1,0 +1,142 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "user1@example.com",
+      "password": "password123",
+      "name": "Nidisha",
+      "profileImage": "https://randomuser.me/api/portraits/women/44.jpg",
+      "accounts": [
+        {
+          "id": 1,
+          "bank": "BankDash Platinum",
+          "number": "**** **** **** 1234",
+          "holder": "Nidisha",
+          "expiry": "12/27",
+          "balance": 75000,
+          "type": "Visa",
+          "bg": "#4e73df"
+        },
+        {
+          "id": 2,
+          "bank": "BankDash Gold",
+          "number": "**** **** **** 5678",
+          "holder": "Nidisha",
+          "expiry": "11/26",
+          "balance": 32500,
+          "type": "Mastercard",
+          "bg": "#f39c12"
+        }
+      ],
+      "transactions": [
+        {
+          "id": 1,
+          "date": "2025-06-10",
+          "description": "Grocery Store",
+          "category": "Shopping",
+          "amount": -156.78,
+          "type": "debit"
+        },
+        {
+          "id": 2,
+          "date": "2025-06-09",
+          "description": "Salary Deposit",
+          "category": "Income",
+          "amount": 5000.00,
+          "type": "credit"
+        },
+        {
+          "id": 3,
+          "date": "2025-06-08",
+          "description": "Electric Bill",
+          "category": "Utilities",
+          "amount": -89.50,
+          "type": "debit"
+        },
+        {
+          "id": 4,
+          "date": "2025-06-07",
+          "description": "Restaurant",
+          "category": "Food & Dining",
+          "amount": -65.20,
+          "type": "debit"
+        },
+        {
+          "id": 5,
+          "date": "2025-06-06",
+          "description": "Online Shopping",
+          "category": "Shopping",
+          "amount": -245.99,
+          "type": "debit"
+        }
+      ],
+      "investments": [
+        {
+          "id": 1,
+          "name": "Stocks",
+          "value": 25000,
+          "change": 5.2,
+          "changeType": "up"
+        },
+        {
+          "id": 2,
+          "name": "Mutual Funds",
+          "value": 18000,
+          "change": -1.8,
+          "changeType": "down"
+        },
+        {
+          "id": 3,
+          "name": "Fixed Deposits",
+          "value": 32000,
+          "change": 0.5,
+          "changeType": "up"
+        }
+      ],
+      "quickTransfer": [
+        {
+          "id": 1,
+          "name": "Alex Johnson",
+          "avatar": "https://randomuser.me/api/portraits/men/32.jpg"
+        },
+        {
+          "id": 2,
+          "name": "Sarah Wilson",
+          "avatar": "https://randomuser.me/api/portraits/women/44.jpg"
+        },
+        {
+          "id": 3,
+          "name": "Mike Brown",
+          "avatar": "https://randomuser.me/api/portraits/men/75.jpg"
+        },
+        {
+          "id": 4,
+          "name": "Emily Davis",
+          "avatar": "https://randomuser.me/api/portraits/women/22.jpg"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "email": "user2@example.com",
+      "password": "password123",
+      "name": "Another User",
+      "accounts": [
+        {
+          "id": 1,
+          "bank": "BankDash Silver",
+          "number": "**** **** **** 9012",
+          "holder": "Another User",
+          "expiry": "10/25",
+          "balance": 50000,
+          "type": "Visa",
+          "bg": "#1cc88a"
+        }
+      ],
+      "transactions": [
+        { "id": 1, "date": "2025-06-02", "desc": "Supermarket", "amount": -3500, "type": "expense" },
+        { "id": 2, "date": "2025-05-31", "desc": "Freelance Payment", "amount": 35000, "type": "income" }
+      ]
+    }
+  ]
+}

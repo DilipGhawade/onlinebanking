@@ -1,0 +1,270 @@
+/* Component-specific styles that work with both light and dark themes */
+
+/* Card styles */
+.card-preview {
+  border-radius: 12px;
+  padding: 1.5rem;
+  color: white;
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-preview:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Header styles */
+.app-header {
+  min-height: 60px;
+}
+
+/* Notification and profile icons */
+.header-icon {
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.header-icon:hover {
+  color: var(--primary);
+}
+
+/* Profile image */
+.profile-img {
+  object-fit: cover;
+  border: 2px solid var(--border-color);
+  transition: border-color 0.2s ease;
+}
+
+.profile-img:hover {
+  border-color: var(--primary);
+}
+
+/* Chart containers */
+.chart-container {
+  height: 250px;
+  width: 100%;
+  background-color: var(--surface);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+}
+
+/* Legend items */
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-right: 1rem;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.legend-dot.primary {
+  background-color: var(--primary);
+}
+
+.legend-dot.success {
+  background-color: var(--success);
+}
+
+/* Login carousel */
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.carousel-caption {
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  padding: 1rem;
+  bottom: 1rem;
+  left: 1rem;
+  right: 1rem;
+}
+
+/* Account card */
+.account-card {
+  background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+  border: none;
+  border-radius: 15px;
+  color: white;
+  overflow: hidden;
+}
+
+/* Chip and card logos */
+.card-chip {
+  height: 30px;
+  margin-bottom: 1rem;
+}
+
+.card-logo {
+  height: 24px;
+}
+
+/* Sidebar styles */
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.5rem 1rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: 4px;
+  margin: 0.25rem 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.sidebar-nav-item:hover,
+.sidebar-nav-item.active {
+  background-color: var(--hover-bg);
+  color: var(--primary);
+}
+
+.sidebar-nav-item i {
+  color: var(--text-muted);
+  transition: color 0.2s ease;
+}
+
+.sidebar-nav-item:hover i,
+.sidebar-nav-item.active i {
+  color: var(--primary);
+}
+
+/* PDF Export styles */
+.pdf-export {
+  font-family: Arial, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  color: var(--text-primary);
+  background-color: var(--surface);
+  padding: 20px;
+}
+
+.pdf-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.pdf-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.pdf-title {
+  margin: 0;
+  color: var(--primary);
+  font-size: 24px;
+}
+
+.pdf-subtitle {
+  margin: 10px 0 5px 0;
+  color: var(--text-primary);
+  font-size: 20px;
+}
+
+.pdf-date {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.pdf-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.pdf-stat-card {
+  background-color: var(--surface-1);
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+}
+
+.pdf-stat-label {
+  margin: 0 0 5px 0;
+  color: var(--text-muted);
+}
+
+.pdf-stat-value {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.pdf-section-title {
+  color: var(--text-primary);
+  font-size: 18px;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.pdf-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.pdf-table th,
+.pdf-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.pdf-table th {
+  background-color: var(--surface-1);
+  font-weight: 600;
+}
+
+.pdf-footer {
+  margin-top: 30px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .chart-container {
+    height: 220px;
+  }
+  
+  .pdf-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print styles */
+@media print {
+  .pdf-export {
+    max-width: 100%;
+    padding: 0;
+  }
+  
+  .pdf-header {
+    padding: 10px 0;
+  }
+  
+  .pdf-table th,
+  .pdf-table td {
+    padding: 8px 10px;
+  }
+}

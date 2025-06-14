@@ -216,6 +216,7 @@ const TransactionsPage = () => {
       // Create a temporary container for the PDF content
       const tempContainer = document.createElement('div');
       tempContainer.id = 'export-pdf-content';
+      tempContainer.className = 'pdf-export';
       tempContainer.style.position = 'absolute';
       tempContainer.style.left = '-9999px';
       tempContainer.style.padding = '20px';
@@ -233,135 +234,93 @@ const TransactionsPage = () => {
 
       // Generate the HTML content for the PDF
       tempContainer.innerHTML = `
-        <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
-          <!-- Header with Bank Logo -->
-          <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0;">
-            <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 10px;">
-              <div style="
-                width: 50px; 
-                height: 50px; 
-                background-color: #4e73df; 
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-right: 15px;
-                color: white;
-                font-weight: bold;
-                font-size: 20px;
-              ">AB</div>
-              <h1 style="margin: 0; color: #1e3c72; font-size: 24px;">Apna Bank</h1>
-            </div>
-            <h2 style="margin: 10px 0 5px 0; color: #333; font-size: 20px;">
-              ${type === 'transactions' ? 'Transaction' : 'Expense'} Report
-            </h2>
-            <p style="margin: 0; color: #666;">Generated on: ${new Date().toLocaleString()}</p>
+        <div class="pdf-header">
+          <div class="pdf-logo">
+            <h1 class="pdf-title">Apna Bank</h1>
           </div>
+          <h2 class="pdf-subtitle">${type === 'transactions' ? 'Transaction' : 'Expense'} Report</h2>
+          <p class="pdf-date">Generated on: ${new Date().toLocaleString()}</p>
+        </div>
+        
+        ${type === 'transactions' ? `
+          <!-- Summary Section for Transactions -->
+          <div class="pdf-stats">
+            <div class="pdf-stat-card">
+              <p class="pdf-stat-label">Total Balance</p>
+              <p class="pdf-stat-value">${formatCurrency(totalBalance)}</p>
+            </div>
+            <div class="pdf-stat-card">
+              <p class="pdf-stat-label">Total Income</p>
+              <p class="pdf-stat-value">+${formatCurrency(totalIncome)}</p>
+            </div>
+            <div class="pdf-stat-card">
+              <p class="pdf-stat-label">Total Expenses</p>
+              <p class="pdf-stat-value">-${formatCurrency(totalExpenses)}</p>
+            </div>
+          </div>
+        ` : ''}
+        
+        <!-- Content Section -->
+        <div>
+          <h3 class="pdf-section-title">${type === 'transactions' ? 'Transaction Details' : 'Expense Categories'}</h3>
           
           ${type === 'transactions' ? `
-            <!-- Summary Section for Transactions -->
-            <div style="margin-bottom: 25px;">
-              <h2 style="color: #333; font-size: 18px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid #eee;">
-                Summary
-              </h2>
-              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
-                <div style="background-color: #f8f9fa; border-radius: 8px; padding: 15px; text-align: center;">
-                  <p style="margin: 0 0 5px 0; color: #666;">Total Balance</p>
-                  <p style="margin: 0; font-size: 18px; font-weight: 600; color: #1e3c72;">${formatCurrency(totalBalance)}</p>
-                </div>
-                <div style="background-color: #f8f9fa; border-radius: 8px; padding: 15px; text-align: center;">
-                  <p style="margin: 0 0 5px 0; color: #666;">Total Income</p>
-                  <p style="margin: 0; font-size: 18px; font-weight: 600; color: #198754;">+${formatCurrency(totalIncome)}</p>
-                </div>
-                <div style="background-color: #f8f9fa; border-radius: 8px; padding: 15px; text-align: center;">
-                  <p style="margin: 0 0 5px 0; color: #666;">Total Expenses</p>
-                  <p style="margin: 0; font-size: 18px; font-weight: 600; color: #dc3545;">-${formatCurrency(totalExpenses)}</p>
-                </div>
-              </div>
-            </div>
-          ` : ''}
-          
-          <!-- Content Section -->
-          <div>
-            <h2 style="color: #333; font-size: 18px; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid #eee;">
-              ${type === 'transactions' ? 'Transaction Details' : 'Expense Categories'}
-            </h2>
-            
-            ${type === 'transactions' ? `
-              <!-- Transactions Table -->
-              <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                <thead>
-                  <tr style="background-color: #f8f9fa;">
-                    <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #dee2e6;">Date</th>
-                    <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #dee2e6;">Description</th>
-                    <th style="padding: 12px 15px; text-align: right; border-bottom: 2px solid #dee2e6;">Amount</th>
-                    <th style="padding: 12px 15px; text-align: left; border-bottom: 2px solid #dee2e6;">Status</th>
+            <!-- Transactions Table -->
+            <table class="pdf-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredTransactions.map(tx => `
+                  <tr>
+                    <td>${formatDate(tx.date)}</td>
+                    <td>${tx.description}</td>
+                    <td class="transaction-amount">${tx.type === 'income' ? '+' : '-'}${formatCurrency(tx.amount)}</td>
+                    <td>
+                      <span class="status-badge ${tx.status === 'completed' ? 'bg-success' : 'bg-warning'}">
+                        ${tx.status}
+                      </span>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  ${filteredTransactions.map(tx => `
-                    <tr style="border-bottom: 1px solid #eee;">
-                      <td style="padding: 12px 15px; color: #666;">${formatDate(tx.date)}</td>
-                      <td style="padding: 12px 15px; font-weight: 500;">${tx.description}</td>
-                      <td style="padding: 12px 15px; text-align: right; font-weight: 500; color: ${tx.type === 'income' ? '#198754' : '#dc3545'};">
-                        ${tx.type === 'income' ? '+' : '-'}${formatCurrency(tx.amount).replace('$', '')}
-                      </td>
-                      <td style="padding: 12px 15px;">
-                        <span style="
-                          background-color: ${tx.status === 'completed' ? '#19875415' : '#ffc10715'}; 
-                          color: ${tx.status === 'completed' ? '#198754' : '#ffc107'}; 
-                          padding: 4px 10px; 
-                          border-radius: 12px; 
-                          font-size: 12px; 
-                          font-weight: 500;
-                          text-transform: capitalize;
-                        ">
-                          ${tx.status}
-                        </span>
-                      </td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            ` : `
-              <!-- Expense Categories -->
-              <div style="margin-bottom: 20px;">
-                ${Object.entries(expenseCategories).map(([category, amount]) => {
-                  const percentage = (amount / totalExpenses * 100).toFixed(1);
-                  return `
-                    <div key="${category}" style="margin-bottom: 15px;">
-                      <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <span style="font-weight: 500;">${category}</span>
-                        <span>${formatCurrency(amount)} (${percentage}%)</span>
-                      </div>
-                      <div style="
-                        width: 100%;
-                        height: 8px;
-                        background-color: #e9ecef;
-                        border-radius: 4px;
-                        overflow: hidden;
-                      ">
-                        <div 
-                          style="
-                            width: ${percentage}%;
-                            height: 100%;
-                            background: linear-gradient(90deg, #4e73df, #224abe);
-                            border-radius: 4px;
-                          "
-                        ></div>
-                      </div>
+                `).join('')}
+              </tbody>
+            </table>
+          ` : `
+            <!-- Expense Categories -->
+            <div class="expense-categories">
+              ${Object.entries(expenseCategories).map(([category, amount]) => {
+                const percentage = (amount / totalExpenses * 100).toFixed(1);
+                return `
+                  <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                      <span>${category}</span>
+                      <span>${formatCurrency(amount)} (${percentage}%)</span>
                     </div>
-                  `;
-                }).join('')}
-              </div>
-            `}
-          </div>
-          
-          <!-- Footer -->
-          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #6c757d; font-size: 14px;">
-            <p style="margin: 0;">This is an auto-generated report. For any discrepancies, please contact support.</p>
-            <p style="margin: 5px 0 0 0;">${new Date().getFullYear()} Apna Bank. All rights reserved.</p>
-          </div>
+                    <div class="progress" style="height: 8px; border-radius: 4px;">
+                      <div 
+                        class="progress-bar" 
+                        role="progressbar" 
+                        style="width: ${percentage}%; background-color: #4e73df; border-radius: 4px;"
+                        aria-valuenow="${percentage}" 
+                        aria-valuemin="0" 
+                        aria-valuemax="100"
+                      ></div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `}
+        </div>
+        
+        <!-- Footer -->
+        <div class="pdf-footer">
+          <p>This is an auto-generated report. For any discrepancies, please contact support.</p>
         </div>
       `;
 
@@ -418,7 +377,7 @@ const TransactionsPage = () => {
   return (
     <div className="transactions-page">
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-        <h2 className="mb-3 mb-md-0">Transactions</h2>
+        {/* <h2 className="mb-3 mb-md-0">Transactions</h2> */}
         <div className="d-flex flex-column flex-sm-row gap-2 w-100 w-md-auto">
           <Button 
             variant="outline-primary" 
@@ -452,28 +411,20 @@ const TransactionsPage = () => {
           <Row className="g-3">
             {/* Balance Card */}
             <Col md={6} lg={4}>
-              <div className="card-preview" style={{
-                background: 'linear-gradient(135deg, #4e73df 0%, #224abe 100%)',
-                borderRadius: '12px',
-                padding: '1.5rem',
-                color: 'white',
-                height: '200px',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
+              <div className="card-preview balance-card">
                 <div className="d-flex justify-content-between align-items-start h-100">
                   <div className="d-flex flex-column justify-content-between h-100">
                     <div>
-                      <p className="mb-1" style={{ opacity: 0.8 }}>Balance</p>
+                      <p className="mb-1">Balance</p>
                       <h3 className="mb-0">{formatCurrency(totalBalance)}</h3>
                     </div>
                     <div className="d-flex justify-content-between align-items-end w-100">
                       <div>
-                        <p className="mb-1" style={{ fontSize: '0.75rem', opacity: 0.8 }}>Card Number</p>
+                        <p className="mb-1" style={{ fontSize: '0.75rem' }}>Card Number</p>
                         <p className="mb-0" style={{ fontSize: '0.9rem' }}>**** **** **** 1234</p>
                       </div>
                       <div>
-                        <p className="mb-1" style={{ fontSize: '0.75rem', opacity: 0.8 }}>Expires</p>
+                        <p className="mb-1" style={{ fontSize: '0.75rem' }}>Expires</p>
                         <p className="mb-0" style={{ fontSize: '0.9rem' }}>12/25</p>
                       </div>
                     </div>
@@ -489,42 +440,26 @@ const TransactionsPage = () => {
                     <FiCreditCard size={20} />
                   </div>
                 </div>
-                <div style={{
-                  position: 'absolute',
-                  right: '-50px',
-                  top: '-50px',
-                  width: '200px',
-                  height: '200px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                }}></div>
+                <div className="absolute-circle"></div>
               </div>
             </Col>
 
             {/* Income Card */}
             <Col md={6} lg={4}>
-              <div className="card-preview" style={{
-                background: 'linear-gradient(135deg, #1cc88a 0%, #13855c 100%)',
-                borderRadius: '12px',
-                padding: '1.5rem',
-                color: 'white',
-                height: '200px',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
+              <div className="card-preview income-card">
                 <div className="d-flex justify-content-between align-items-start h-100">
                   <div className="d-flex flex-column justify-content-between h-100">
                     <div>
-                      <p className="mb-1" style={{ opacity: 0.8 }}>Income</p>
+                      <p className="mb-1">Income</p>
                       <h3 className="mb-0">{formatCurrency(totalIncome)}</h3>
                     </div>
                     <div className="d-flex justify-content-between align-items-end w-100">
                       <div>
-                        <p className="mb-1" style={{ fontSize: '0.75rem', opacity: 0.8 }}>This Month</p>
+                        <p className="mb-1" style={{ fontSize: '0.75rem' }}>This Month</p>
                         <p className="mb-0" style={{ fontSize: '0.9rem' }}>+12.5%</p>
                       </div>
                       <div>
-                        <p className="mb-1" style={{ fontSize: '0.75rem', opacity: 0.8 }}>Last Month</p>
+                        <p className="mb-1" style={{ fontSize: '0.75rem' }}>Last Month</p>
                         <p className="mb-0" style={{ fontSize: '0.9rem' }}>+8.2%</p>
                       </div>
                     </div>
@@ -540,42 +475,26 @@ const TransactionsPage = () => {
                     <FiArrowUp size={20} />
                   </div>
                 </div>
-                <div style={{
-                  position: 'absolute',
-                  right: '-50px',
-                  top: '-50px',
-                  width: '200px',
-                  height: '200px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                }}></div>
+                <div className="absolute-circle"></div>
               </div>
             </Col>
 
             {/* Expenses Card */}
             <Col md={6} lg={4}>
-              <div className="card-preview" style={{
-                background: 'linear-gradient(135deg, #e74a3b 0%, #be2617 100%)',
-                borderRadius: '12px',
-                padding: '1.5rem',
-                color: 'white',
-                height: '200px',
-                position: 'relative',
-                overflow: 'hidden'
-              }}>
+              <div className="card-preview expenses-card">
                 <div className="d-flex justify-content-between align-items-start h-100">
                   <div className="d-flex flex-column justify-content-between h-100">
                     <div>
-                      <p className="mb-1" style={{ opacity: 0.8 }}>Expenses</p>
+                      <p className="mb-1">Expenses</p>
                       <h3 className="mb-0">{formatCurrency(totalExpenses)}</h3>
                     </div>
                     <div className="d-flex justify-content-between align-items-end w-100">
                       <div>
-                        <p className="mb-1" style={{ fontSize: '0.75rem', opacity: 0.8 }}>This Month</p>
+                        <p className="mb-1" style={{ fontSize: '0.75rem' }}>This Month</p>
                         <p className="mb-0" style={{ fontSize: '0.9rem' }}>-8.3%</p>
                       </div>
                       <div>
-                        <p className="mb-1" style={{ fontSize: '0.75rem', opacity: 0.8 }}>Last Month</p>
+                        <p className="mb-1" style={{ fontSize: '0.75rem' }}>Last Month</p>
                         <p className="mb-0" style={{ fontSize: '0.9rem' }}>-5.7%</p>
                       </div>
                     </div>
@@ -591,15 +510,7 @@ const TransactionsPage = () => {
                     <FiArrowDown size={20} />
                   </div>
                 </div>
-                <div style={{
-                  position: 'absolute',
-                  right: '-50px',
-                  top: '-50px',
-                  width: '200px',
-                  height: '200px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                }}></div>
+                <div className="absolute-circle"></div>
               </div>
             </Col>
           </Row>

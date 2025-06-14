@@ -4,33 +4,37 @@
   max-width: 1200px;
   margin: 0 auto;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
 }
 
 /* Summary Cards */
 .summary-card {
   border: none;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--elevation-1);
   transition: transform 0.2s, box-shadow 0.2s;
   height: 100%;
   border-left: 4px solid transparent;
+  background-color: var(--surface);
+  color: var(--text-primary);
 }
 
 .summary-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--elevation-3);
 }
 
 .balance-card {
-  border-left-color: #4e73df;
+  border-left-color: var(--primary);
 }
 
 .income-card {
-  border-left-color: #1cc88a;
+  border-left-color: var(--success);
 }
 
 .expense-card {
-  border-left-color: #e74a3b;
+  border-left-color: var(--danger);
 }
 
 .summary-card .card-body {
@@ -41,10 +45,11 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
+  color: var(--text-primary);
 }
 
 .summary-card p {
-  color: #6c757d;
+  color: var(--text-muted);
   margin: 0;
   font-size: 0.875rem;
 }
@@ -57,31 +62,35 @@
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
+  background-color: var(--surface-2);
+  color: var(--primary);
 }
 
 .bg-primary-light {
-  background-color: rgba(78, 115, 223, 0.1);
+  background-color: var(--primary-lighter);
 }
 
 .bg-success-light {
-  background-color: rgba(28, 200, 138, 0.1);
+  background-color: var(--success-light);
 }
 
 .bg-danger-light {
-  background-color: rgba(231, 74, 59, 0.1);
+  background-color: var(--danger-light);
 }
 
 /* Transactions Card */
 .transactions-card {
-  border: none;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--elevation-1);
   margin-top: 1.5rem;
   overflow: hidden;
+  background-color: var(--surface);
 }
 
 .transactions-card .card-body {
   padding: 1.5rem;
+  background-color: var(--surface);
 }
 
 /* Transactions List */
@@ -91,8 +100,9 @@
 
 .transaction-item {
   padding: 1rem 0;
-  border-bottom: 1px solid #edf2f7;
+  border-bottom: 1px solid var(--border-color);
   transition: background-color 0.2s;
+  background-color: var(--surface);
 }
 
 .transaction-item:last-child {
@@ -100,31 +110,31 @@
 }
 
 .transaction-item:hover {
-  background-color: #f8fafc;
+  background-color: var(--hover-bg);
 }
 
 .transaction-icon {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background-color: #f0f4f8;
+  background-color: var(--surface-2);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
-  color: #4e73df;
+  color: var(--primary);
 }
 
 .transaction-details h6 {
   font-size: 0.9375rem;
   font-weight: 600;
   margin: 0 0 0.25rem 0;
-  color: #2d3748;
+  color: var(--text-primary);
 }
 
 .transaction-details .text-muted {
   font-size: 0.8125rem;
-  color: #718096;
+  color: var(--text-muted);
 }
 
 .amount {
@@ -133,11 +143,11 @@
 }
 
 .credit {
-  color: #1cc88a;
+  color: var(--success);
 }
 
 .debit {
-  color: #e74a3b;
+  color: var(--danger);
 }
 
 .status-badge {
@@ -146,6 +156,7 @@
   padding: 0.25rem 0.5rem;
   border-radius: 6px;
   text-transform: capitalize;
+  background-color: var(--surface-2);
 }
 
 /* Pagination */
@@ -155,8 +166,8 @@
 }
 
 .page-link {
-  border: 1px solid #e2e8f0;
-  color: #4a5568;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   font-size: 0.875rem;
   min-width: 36px;
   height: 36px;
@@ -165,168 +176,124 @@
   justify-content: center;
   border-radius: 8px !important;
   transition: all 0.2s;
+  background-color: var(--surface);
 }
 
 .page-link:hover {
-  background-color: #f8fafc;
-  border-color: #cbd5e0;
-  color: #2d3748;
+  background-color: var(--hover-bg);
+  border-color: var(--border-light);
+  color: var(--text-primary);
 }
 
 .page-item.active .page-link {
-  background-color: #4e73df;
-  border-color: #4e73df;
-  color: white;
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
 }
 
 .page-item.disabled .page-link {
-  color: #a0aec0;
-  background-color: #f8fafc;
-  border-color: #e2e8f0;
+  color: var(--text-muted);
+  background-color: var(--surface-1);
+  border-color: var(--border-color);
 }
 
 /* Filter Section */
 .filter-card {
   margin-bottom: 1.5rem;
   border-radius: 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   overflow: hidden;
+  background-color: var(--surface);
 }
 
 .filter-card .card-body {
   padding: 1.25rem;
+  background-color: var(--surface);
 }
 
-.form-label {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #4a5568;
-  margin-bottom: 0.5rem;
+/* Form Elements */
+.form-control, .form-select {
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 
-.form-control,
-.form-select {
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.form-control:focus,
-.form-select:focus {
-  border-color: #a3bffa;
-  box-shadow: 0 0 0 3px rgba(164, 202, 254, 0.45);
+.form-control:focus, .form-select:focus {
+  background-color: var(--surface);
+  border-color: var(--primary);
+  color: var(--text-primary);
+  box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
 }
 
 /* Buttons */
-.btn {
-  font-weight: 500;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  transition: all 0.2s;
-}
-
 .btn-outline-primary {
-  color: #4e73df;
-  border-color: #4e73df;
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 .btn-outline-primary:hover {
-  background-color: #4e73df;
-  color: white;
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: var(--on-primary);
 }
 
-.btn-outline-secondary {
-  color: #6c757d;
-  border-color: #e2e8f0;
+/* Table Styles */
+.table {
+  color: var(--text-primary);
+  background-color: var(--surface);
 }
 
-.btn-outline-secondary:hover {
-  background-color: #f8f9fa;
-  color: #4a5568;
+.table th {
+  background-color: var(--surface-1);
+  border-color: var(--border-color);
 }
 
-/* Responsive Adjustments */
-@media (max-width: 991.98px) {
+.table td {
+  border-color: var(--border-color);
+  background-color: var(--surface);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
   .transactions-page {
+    padding: 1rem;
+  }
+  
+  .transactions-card .card-body {
     padding: 1rem;
   }
   
   .summary-card {
     margin-bottom: 1rem;
   }
-  
-  .transactions-card .card-body {
-    padding: 1.25rem;
-  }
 }
 
-@media (max-width: 767.98px) {
-  .transactions-page {
-    padding: 1rem 0.75rem;
-  }
-  
-  .summary-card h3 {
-    font-size: 1.25rem;
-  }
-  
-  .icon-box {
-    width: 40px;
-    height: 40px;
-    font-size: 1.1rem;
-  }
-  
-  .transaction-item {
-    padding: 0.75rem 0;
-  }
-  
-  .transaction-icon {
-    width: 36px;
-    height: 36px;
-    font-size: 1.1rem;
-  }
-  
-  .transaction-details h6 {
-    font-size: 0.875rem;
-  }
-  
-  .transaction-details .text-muted {
-    font-size: 0.75rem;
-  }
-  
-  .amount {
-    font-size: 0.875rem;
-  }
-}
-
-/* Animation for transaction items */
+/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.transaction-item {
-  animation: fadeIn 0.3s ease-out forwards;
+/* Ensure all cards use theme colors */
+.card {
+  background-color: var(--surface);
+  border-color: var(--border-color);
+  color: var(--text-primary);
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.card-header {
+  background-color: var(--surface-1);
+  border-bottom-color: var(--border-color);
+  color: var(--text-primary);
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
+/* Ensure all text uses theme colors */
+h1, h2, h3, h4, h5, h6, p, span, div {
+  color: var(--text-primary);
 }
 
-::-webkit-scrollbar-thumb {
-  background: #cbd5e0;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a0aec0;
+/* Ensure all backgrounds use theme colors */
+body, .app-container, .main-content {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
 }

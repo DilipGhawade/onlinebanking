@@ -1,20 +1,128 @@
-:root {
-    --header-height: 64px; /* Match your header height */
+/* Main Layout */
+body {
+  overflow-x: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+/* Header */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+  height: 56px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  -webkit-transform: translateZ(0); /* Fix for iOS scrolling */
+  transform: translateZ(0);
+  transition: left 0.3s ease-in-out;
+}
+
+/* Desktop styles */
+@media (min-width: 992px) {
+  header {
+    left: 250px; /* Width of sidebar */
+    width: calc(100% - 250px);
+  }
+}
+
+/* Header container */
+.header-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0 0.5rem;
+  margin: 0;
+  box-sizing: border-box;
+  gap: 0.5rem;
+}
+
+/* Mobile menu button */
+.btn-menu {
+  padding: 0.5rem !important;
+  margin: 0 !important;
+  min-width: 40px !important;
+  width: 40px !important;
+  height: 40px !important;
+  position: relative;
+  z-index: 1;
+  -webkit-tap-highlight-color: transparent;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.btn-menu:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Sidebar */
+.sidebar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 250px;
+  z-index: 1040;
+  background-color: #fff;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  overflow-y: auto;
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+.sidebar-wrapper.open {
+  transform: translateX(0);
+}
+
+/* Fix for iOS safe area */
+@supports (padding: max(0px)) {
+  .sidebar-wrapper {
+    padding-top: max(env(safe-area-inset-top, 0px), 0.5rem);
+  }
+}
+
+/* Main Content */
+.main-content {
+  padding-top: 56px; /* Height of the header */
+  min-height: 100vh;
+  width: 100%;
+  transition: margin 0.3s ease-in-out;
+  margin: 0;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+}
+
+/* Dark mode support */
+[data-bs-theme="dark"] .sidebar-wrapper,
+[data-bs-theme="dark"] .navbar {
+  background-color: #212529;
+}
+
+[data-bs-theme="dark"] .main-content {
+  background-color: #1a1d20;
+}
+
+/* Desktop styles */
+@media (min-width: 992px) {
+  .sidebar-wrapper {
+    transform: none;
   }
   
   .main-content {
-    padding-top: var(--header-height);
-    margin-left: 0;
-    padding-bottom: 1rem;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    min-height: 100vh;
-    background-color: #f8f9fa;
+    margin-left: 250px;
   }
   
-  @media (min-width: 768px) {
-    .main-content {
-      margin-left: var(--sidebar-width);
-    }
-  }
-  
+  /* Header styles moved to the main header rule */
+}
