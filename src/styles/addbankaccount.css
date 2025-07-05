@@ -1,0 +1,44 @@
+/* Card Type Select Styling */
+.bank-select {
+    position: relative;
+    width: 100%;
+  }
+  
+  .bank-select select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 100%;
+    padding: 0.5rem 3rem 0.5rem 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    background-color: #fff;
+    cursor: pointer;
+    height: calc(1.5em + 1rem + 2px);
+  }
+  
+  .bank-select .select-arrow {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #6c757d;
+  }
+  
+  /* Card Icons */
+  .fa-cc-visa {
+    color: #1a1f71; /* Visa blue */
+  }
+  
+  .fa-cc-mastercard {
+    color: #eb001b; /* Mastercard red */
+  }
+  
+  .fa-cc-amex {
+    color: #006fcf; /* Amex blue */
+  }
+  
+  .fa-cc-discover {
+    color: #ff6600; /* Discover orange */
+  }

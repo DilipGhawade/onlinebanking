@@ -81,11 +81,11 @@ const totalLoanMoney = activeLoans.reduce((sum, loan) => sum + parseInt(loan.loa
 const totalLeftToRepay = activeLoans.reduce((sum, loan) => sum + parseInt(loan.leftToRepay.replace(/[^0-9]/g, '')), 0);
 const totalInstallment = activeLoans.reduce((sum, loan) => sum + parseFloat(loan.installment.replace(/[^0-9.]/g, '')), 0);
 
-export function LoansPage() {
+function LoansPage() {
   return (
     <Container fluid className="p-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4>Loans</h4>
+        {/* <h4>Loans</h4> */}
         <Button variant="primary" size="sm">
           <FiPlus className="me-1" /> Apply for Loan
         </Button>
@@ -221,3 +221,5 @@ export function LoansPage() {
     </Container>
   );
 }
+
+export default LoansPage;

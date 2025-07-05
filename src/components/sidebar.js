@@ -1,111 +1,154 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  House,
-  Repeat,
-  Person,
-  Layers,
-  CreditCard,
-  GraphUp,
-  LifePreserver,
-  Gear,
-  BoxArrowRight,
-  X,
-  List,
-} from 'react-bootstrap-icons';
-import { Nav } from 'react-bootstrap';
-import { useTheme } from '../context/ThemeContext';
+import { 
+  FaHome,
+  FaExchangeAlt,
+  FaWallet,
+  FaChartLine,
+  FaCreditCard,
+  FaFileInvoiceDollar,
+  FaPiggyBank,
+  FaCog
+} from 'react-icons/fa';
+import { HiOutlineLogout } from 'react-icons/hi';
+import { menuItems } from '../constants/menuItems';
+import './Sidebar.css';
 
-const menuItems = [
-  { label: 'Dashboard', icon: <House />, path: '/dashboard' },
-  { label: 'Transactions', icon: <Repeat />, path: '/dashboard/transactions' },
-  { label: 'Accounts', icon: <Person />, path: '/dashboard/accounts' },
-  { label: 'Investments', icon: <Layers />, path: '/dashboard/investments' },
-  { label: 'Credit Cards', icon: <CreditCard />, path: '/dashboard/credit-cards' },
-  { label: 'Loans', icon: <GraphUp />, path: '/dashboard/loans' },
-  { label: 'Services', icon: <LifePreserver />, path: '/dashboard/services' },
-  { label: 'Settings', icon: <Gear />, path: '/dashboard/setting' },
-];
+// Map icon names to their corresponding components
+const iconComponents = {
+  FaHome,
+  FaExchangeAlt,
+  FaWallet,
+  FaChartLine,
+  FaCreditCard,
+  FaFileInvoiceDollar,
+  FaPiggyBank,
+  FaCog
+};
 
-function Sidebar({ active, onLogout, onClose }) {
+const Sidebar = ({ onLogout, onClose, isMobile, activeMenu, setActiveMenu }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme } = useTheme();
-
-  const handleNavigation = (path, e) => {
+  
+  // Update active menu based on current route
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const activeItem = menuItems.find(item => item.path === currentPath);
+    if (activeItem) {
+      setActiveMenu(activeItem.label);
+    }
+  }, [location.pathname, setActiveMenu]);
+  
+  // Handle menu item click
+  const handleMenuClick = useCallback((item, e) => {
     e.preventDefault();
-    if (path === '/logout') {
-      onLogout();
-    } else {
-      navigate(path);
+    e.stopPropagation();
+    
+    if (item.path) {
+      // Update the active menu in the parent component
+      setActiveMenu(item.label);
+      
+      // Navigate to the selected path
+      navigate(item.path);
+      
       // Close sidebar on mobile after navigation
-      if (window.innerWidth < 992) {
+      if (isMobile) {
         onClose();
       }
     }
-  };
+  }, [navigate, isMobile, onClose, setActiveMenu]);
+  
+  // Set active menu based on current route on initial load
+  useEffect(() => {
+    const currentPath = location.pathname;
+    
+    // Find the matching menu item
+    const findActiveMenu = () => {
+      // Find the menu item that matches the current path
+      const activeItem = menuItems.find(item => item.path === currentPath);
+      
+      // If found, return its label, otherwise default to 'Dashboard'
+      return activeItem ? activeItem.label : 'Dashboard';
+    };
+    
+    // Update the active menu if it's different
+    const newActiveMenu = findActiveMenu();
+    if (newActiveMenu !== activeMenu) {
+      setActiveMenu(newActiveMenu);
+    }
+  }, [location.pathname, activeMenu, setActiveMenu]);
 
+  const handleLogout = useCallback(() => {
+    onLogout();
+  }, [onLogout]);
+
+  // Use FaWallet for the logo
+  const LogoIcon = FaWallet;
+  
   return (
-    <div className="h-100 d-flex flex-column" style={{ backgroundColor: theme === 'dark' ? '#212529' : '#fff' }}>
-      {/* Logo and Brand */}
-      <div className="d-flex align-items-center p-3 border-bottom">
-        <div className="d-flex align-items-center" style={{ gap: '10px' }}>
-          <div className="d-flex align-items-center justify-content-center rounded" 
-               style={{ 
-                 width: '32px', 
-                 height: '32px', 
-                 backgroundColor: '#1e3c72',
-                 flexShrink: 0
-               }}>
-            <span className="text-white fw-bold">
-              {process.env.REACT_APP_NAME?.charAt(0) || 'B'}
-            </span>
-          </div>
-          <h5 className="mb-0 fw-bold d-block">Bank Name</h5>
+    <div className="sidebar bg-white h-100 d-flex flex-column">
+      <div className="sidebar-header d-flex align-items-center justify-content-between p-3 border-bottom">
+        <div className="d-flex align-items-center">
+          <FaWallet className="text-primary me-2" style={{ fontSize: '1.75rem' }} />
+          <span className="h4 mb-0 fw-bold text-dark">BankApp</span>
         </div>
-        <button 
-          className="btn p-0 ms-auto d-lg-none"
-          onClick={onClose}
-          style={{ 
-            border: 'none', 
-            background: 'none',
-            padding: '0.5rem',
-            marginRight: '-0.5rem'
-          }}
-        >
-          <X size={24} className={theme === 'dark' ? 'text-light' : 'text-dark'} />
-        </button>
+        {isMobile && (
+          <button 
+            className="btn btn-link p-0"
+            onClick={onClose}
+            aria-label="Close menu"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 18L18 6M6 6l12 12" stroke="#6c757d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        )}
       </div>
-
-      {/* Navigation */}
-      <Nav className="flex-column p-2 flex-grow-1">
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <Nav.Link
-              key={item.path}
-              className={`d-flex align-items-center px-3 py-2 mb-1 rounded ${isActive ? 'bg-primary text-white' : 'text-body'}`}
-              onClick={(e) => handleNavigation(item.path, e)}
-            >
-              <span className="me-3">{item.icon}</span>
-              <span>{item.label}</span>
-            </Nav.Link>
-          );
-        })}
-      </Nav>
-
-      {/* Logout Button */}
-      <div className="p-3 border-top">
+      
+      <div className="sidebar-body flex-grow-1 overflow-auto py-2">
+        <ul className="nav flex-column">
+          {menuItems.map((item) => {
+            const IconComponent = iconComponents[item.icon] || FaHome;
+            const isActive = location.pathname === item.path;
+            
+            return (
+              <li key={item.path} className="nav-item">
+                <a
+                  href={item.path}
+                  className={`nav-link d-flex align-items-center py-2 px-4 mx-2 rounded ${
+                    isActive 
+                      ? 'bg-primary bg-opacity-10 text-primary fw-semibold' 
+                      : 'text-dark hover-bg-light'
+                  }`}
+                  onClick={(e) => handleMenuClick(item, e)}
+                >
+                  <IconComponent 
+                    className="me-3" 
+                    style={{ 
+                      width: '20px', 
+                      textAlign: 'center',
+                      color: isActive ? 'var(--bs-primary)' : 'var(--bs-gray-700)'
+                    }} 
+                  />
+                  <span>{item.label}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+      
+      <div className="sidebar-footer p-3 border-top mt-auto">
         <button
+          onClick={handleLogout}
           className="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center"
-          onClick={onLogout}
         >
-          <BoxArrowRight className="me-2" />
-          <span>Logout</span>
+          <HiOutlineLogout className="me-2" />
+          Logout
         </button>
       </div>
     </div>
   );
-}
+};
 
 export default Sidebar;

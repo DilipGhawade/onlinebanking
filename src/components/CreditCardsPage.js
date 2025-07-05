@@ -1,425 +1,471 @@
-import React, { useRef, useState, useEffect } from "react";
-import { Container, Row, Col, Card, ProgressBar, Button, Badge } from "react-bootstrap";
-import { 
-  FiCreditCard, 
-  FiDollarSign, 
-  FiBarChart2, 
-  FiClock, 
-  FiShoppingBag, 
-  FiGift, 
-  FiCoffee, 
-  FiShoppingCart, 
-  FiPlus,
-  FiChevronLeft,
-  FiChevronRight
-} from "react-icons/fi";
+import React, { useState, useEffect, useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { Card, Button, Container, Row, Col, Modal, Form, Spinner, Alert, Pagination, Badge } from 'react-bootstrap';
+import { FaCreditCard, FaPlus, FaMoneyBillWave, FaShoppingCart, FaUtensils, FaGamepad, FaCar, FaPiggyBank, FaCreditCard as FaCreditCardIcon, FaCalendarAlt } from 'react-icons/fa';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const cards = [
-  {
-    id: 1,
-    bank: "BankDash Platinum",
-    number: "**** **** **** 1234",
-    holder: "Nidisha",
-    expiry: "12/27",
-    balance: "75,000",
-    available: "68,000",
-    type: "Visa",
-    bg: "#3b5998",
-    transactions: [
-      { id: 1, icon: <FiShoppingBag className="text-primary" />, merchant: "Amazon", date: "12 Jun 2024", amount: "-₹1,200", category: "Shopping" },
-      { id: 2, icon: <FiGift className="text-success" />, merchant: "Flipkart", date: "10 Jun 2024", amount: "-₹3,500", category: "Shopping" },
-      { id: 3, icon: <FiCoffee className="text-warning" />, merchant: "Starbucks", date: "08 Jun 2024", amount: "-₹350", category: "Food" },
-    ]
-  },
-  {
-    id: 2,
-    bank: "BankDash Gold",
-    number: "**** **** **** 5678",
-    holder: "Nidisha",
-    expiry: "11/26",
-    balance: "32,500",
-    available: "28,700",
-    type: "Mastercard",
-    bg: "#f39c12",
-    transactions: [
-      { id: 1, icon: <FiShoppingCart className="text-danger" />, merchant: "Big Bazaar", date: "05 Jun 2024", amount: "-₹2,800", category: "Groceries" },
-      { id: 2, icon: <FiGift className="text-success" />, merchant: "Myntra", date: "01 Jun 2024", amount: "-₹1,800", category: "Shopping" },
-    ]
-  },
-  {
-    id: 3,
-    bank: "BankDash Silver",
-    number: "**** **** **** 9999",
-    holder: "Nidisha",
-    expiry: "10/25",
-    balance: "12,000",
-    available: "10,500",
-    type: "Rupay",
-    bg: "#16a085",
-    transactions: [
-      { id: 1, icon: <FiCoffee className="text-warning" />, merchant: "Cafe Coffee Day", date: "28 May 2024", amount: "-₹250", category: "Food" },
-    ]
-  },
-];
+// Mock API calls - Replace with actual API service
+const API_BASE_URL = 'http://localhost:3001';
 
-const spendingCategories = [
-  { name: "Shopping", amount: "₹12,500", percentage: 45, color: "primary" },
-  { name: "Food & Drinks", amount: "₹8,300", percentage: 30, color: "warning" },
-  { name: "Groceries", amount: "₹4,200", percentage: 15, color: "success" },
-  { name: "Others", amount: "₹2,500", percentage: 10, color: "info" },
-];
+const CreditCardsPage = () => {
+  const { user: currentUser } = useSelector((state) => state.auth);
 
-export function CreditCardsPage() {
-  const [activeCard, setActiveCard] = useState(0);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const scrollRef = useRef(null);
-  const cardRefs = useRef([]);
+  const [cards, setCards] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showAddCard, setShowAddCard] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [formData, setFormData] = useState({
+    accountId: '',
+    cardNetwork: 'VISA',
+    cardHolder: '',
+    spendingLimit: 50000,
+    isVirtual: false
+  });
+  const transactionsPerPage = 5;
 
-  // Update mobile state on window resize
+  // Fetch user's credit cards and accounts
   useEffect(() => {
-    const handleResize = () => {
-      const mobile = window.innerWidth < 768;
-      setIsMobile(mobile);
-      // Recalculate card widths when screen size changes
-      if (cardRefs.current[activeCard]) {
-        cardRefs.current[activeCard].scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-          inline: 'center'
-        });
+    const fetchData = async () => {
+      if (!currentUser?.id) return;
+      
+      // Add selectedCard to the dependency array to fix the warning
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      
+      try {
+        setLoading(true);
+        // Fetch accounts
+        const accountsRes = await fetch(`${API_BASE_URL}/accounts?userId=${currentUser.id}`);
+        const accountsData = await accountsRes.json();
+        setAccounts(accountsData);
+
+        // Fetch credit cards (only credit cards, not debit)
+        const cardsRes = await fetch(`${API_BASE_URL}/cards?userId=${currentUser.id}&isCreditCard=true`);
+        const cardsData = await cardsRes.json();
+        setCards(cardsData);
+
+        // Fetch transactions for all cards
+        if (cardsData.length > 0) {
+          const txnRes = await fetch(`${API_BASE_URL}/transactions?userId=${currentUser.id}&paymentMethod=card`);
+          const txnData = await txnRes.json();
+          setTransactions(txnData);
+          
+          // Select first card by default
+          if (!selectedCard && cardsData.length > 0) {
+            setSelectedCard(cardsData[0].id);
+          }
+        }
+      } catch (err) {
+        setError('Failed to load data. Please try again.');
+        console.error('Error fetching data:', err);
+      } finally {
+        setLoading(false);
       }
     };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [activeCard]);
 
-  const scrollToCard = (index) => {
-    setActiveCard(index);
-    if (cardRefs.current[index]) {
-      cardRefs.current[index].scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-        inline: 'center'
+    fetchData();
+  }, [currentUser?.id, selectedCard]);
+
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  // Generate a random card number
+  const generateCardNumber = () => {
+    return '4' + Array.from({length: 15}, () => Math.floor(Math.random() * 10)).join('');
+  };
+
+  // Add new credit card
+  const handleAddCard = async (e) => {
+    e.preventDefault();
+    if (!currentUser?.id) {
+      toast.error('Please log in to add a card');
+      return;
+    }
+
+    try {
+      const newCard = {
+        ...formData,
+        id: `card-${Date.now()}`,
+        userId: parseInt(currentUser.id),
+        accountId: parseInt(formData.accountId),
+        cardNumber: generateCardNumber(),
+        expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 5)).toLocaleDateString('en-US', {month: '2-digit', year: '2-digit'}).replace('/', '/'),
+        cvv: Math.floor(100 + Math.random() * 900).toString(),
+        isActive: true,
+        isCreditCard: true,
+        availableBalance: formData.spendingLimit,
+        cardColor: formData.cardNetwork === 'VISA' ? '#1a1f71' : '#f79e1b',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      const response = await fetch(`${API_BASE_URL}/cards`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newCard)
       });
+
+      if (!response.ok) throw new Error('Failed to add card');
+      
+      const addedCard = await response.json();
+      setCards([...cards, addedCard]);
+      setShowAddCard(false);
+      setFormData({
+        accountId: '',
+        cardNetwork: 'VISA',
+        cardHolder: currentUser.name || '',
+        spendingLimit: 50000,
+        isVirtual: false
+      });
+      toast.success('Credit card added successfully!');
+    } catch (error) {
+      console.error('Error adding card:', error);
+      toast.error(error.message || 'Failed to add card');
     }
   };
 
-  const scroll = (direction) => {
-    const newIndex = direction === 'left' 
-      ? (activeCard - 1 + cards.length) % cards.length
-      : (activeCard + 1) % cards.length;
-    scrollToCard(newIndex);
+  // Filter transactions for selected card
+  const cardTransactions = useMemo(() => {
+    if (!selectedCard) return [];
+    return transactions
+      .filter(txn => txn.cardId === selectedCard)
+      .sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+  }, [transactions, selectedCard]);
+
+  // Calculate pagination
+  const indexOfLastTransaction = currentPage * transactionsPerPage;
+  const indexOfFirstTransaction = indexOfLastTransaction - transactionsPerPage;
+  const currentTransactions = cardTransactions.slice(indexOfFirstTransaction, indexOfLastTransaction);
+  const totalPages = Math.ceil(cardTransactions.length / transactionsPerPage);
+
+
+
+  // Format card number for display
+  const formatCardNumber = (number) => {
+    if (!number) return '•••• •••• •••• ••••';
+    const lastFour = number.slice(-4);
+    return `•••• •••• •••• ${lastFour}`;
   };
 
-  const currentCard = cards[activeCard];
-  const spendingTotal = spendingCategories.reduce((sum, cat) => sum + parseInt(cat.amount.replace(/[^0-9]/g, '')), 0);
-
-  // Calculate card width based on screen size
-  const getCardWidth = () => {
-    if (window.innerWidth < 400) return window.innerWidth - 32; // 16px padding on each side
-    if (window.innerWidth < 768) return window.innerWidth - 64; // 32px padding on each side for tablets
-    return 300; // Fixed width for desktop
+  // Get category icon
+  const getCategoryIcon = (category) => {
+    switch (category?.toLowerCase()) {
+      case 'shopping':
+        return <FaShoppingCart className="me-2" />;
+      case 'food':
+        return <FaUtensils className="me-2" />;
+      case 'entertainment':
+        return <FaGamepad className="me-2" />;
+      case 'transport':
+        return <FaCar className="me-2" />;
+      case 'savings':
+        return <FaPiggyBank className="me-2" />;
+      default:
+        return <FaMoneyBillWave className="me-2" />;
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <Alert variant="danger">{error}</Alert>;
+  }
 
   return (
-    <Container fluid className="p-0 p-md-3">
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 mb-md-4">
-        <h4 className="mb-3 mb-md-0">My Cards</h4>
-        <Button 
-          variant="primary" 
-          size={isMobile ? 'sm' : 'md'} 
-          className="d-flex align-items-center"
-        >
-          <FiPlus className="me-1" /> Add New Card
+    <Container className="py-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2><FaCreditCard className="me-2" /> My Credit Cards</h2>
+        <Button variant="primary" onClick={() => setShowAddCard(true)}>
+          <FaPlus className="me-2" /> Add Credit Card
         </Button>
       </div>
 
-      {/* Cards Carousel */}
-      <div className="position-relative mb-4">
-        <div 
-          ref={scrollRef}
-          className="d-flex overflow-auto hide-scrollbar"
-          style={{ 
-            scrollSnapType: 'x mandatory',
-            scrollBehavior: 'smooth',
-            scrollPadding: '0 16px',
-            gap: '16px',
-            padding: '8px 8px 24px',
-            msOverflowStyle: 'none',
-            scrollbarWidth: 'none',
-            WebkitOverflowScrolling: 'touch'
-          }}
-        >
-          {cards.map((card, index) => (
-            <div 
-              key={card.id} 
-              ref={el => cardRefs.current[index] = el}
-              className="flex-shrink-0"
-              style={{ 
-                width: `${getCardWidth()}px`,
-                scrollSnapAlign: 'center',
-                transition: 'transform 0.3s ease'
-              }}
-              onClick={() => scrollToCard(index)}
-            >
-              <Card 
-                className={`h-100 border-0 text-white ${activeCard === index ? 'shadow-lg' : 'opacity-75'}`}
-                style={{ 
-                  background: `linear-gradient(135deg, ${card.bg} 0%, ${card.bg}99 100%)`,
-                  borderRadius: '16px',
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer',
-                  minHeight: '200px',
-                  transform: activeCard === index ? 'scale(1)' : 'scale(0.95)',
-                  boxShadow: activeCard === index ? '0 10px 20px rgba(0,0,0,0.15)' : '0 4px 8px rgba(0,0,0,0.1)'
-                }}
-              >
-                <Card.Body className="d-flex flex-column justify-content-between p-3 p-md-4">
-                  <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h5 className="mb-0 text-truncate" style={{maxWidth: '70%'}}>{card.bank}</h5>
-                    <div className="bg-white rounded p-1 px-2">
-                      <span className="text-dark fw-bold small">{card.type}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <h6 className="mb-2 small text-white-50">Card Number</h6>
-                    <h4 className="mb-3 fw-bold">{card.number}</h4>
-                    <div className="d-flex justify-content-between">
+      {cards.length === 0 ? (
+        <Card className="text-center p-5">
+          <FaCreditCardIcon size={48} className="mb-3 text-muted" />
+          <h4>No Credit Cards Found</h4>
+          <p className="text-muted mb-4">You don't have any credit cards yet. Add your first credit card to get started.</p>
+          <Button variant="primary" onClick={() => setShowAddCard(true)}>
+            <FaPlus className="me-2" /> Add Your First Credit Card
+          </Button>
+        </Card>
+      ) : (
+        <>
+          <Row className="mb-4">
+            {cards.map(card => (
+              <Col key={card.id} md={6} lg={4} className="mb-4">
+                <Card 
+                  className={`h-100 ${selectedCard === card.id ? 'border-primary' : ''}`}
+                  onClick={() => setSelectedCard(card.id)}
+                  style={{ cursor: 'pointer', borderLeft: `5px solid ${card.cardColor}` }}
+                >
+                  <Card.Body>
+                    <div className="d-flex justify-content-between align-items-center mb-3">
                       <div>
-                        <div className="small text-white-50">Card Holder</div>
-                        <div className="fw-medium">{card.holder}</div>
+                        <h5 className="mb-0">{card.cardNetwork}</h5>
+                        <small className="text-muted">{card.isVirtual ? 'Virtual Card' : 'Physical Card'}</small>
                       </div>
-                      <div className="text-end">
-                        <div className="small text-white-50">Expires</div>
-                        <div className="fw-medium">{card.expiry}</div>
-                      </div>
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
-            </div>
-          ))}
-        </div>
-        
-        {!isMobile && cards.length > 1 && (
-          <>
-            <Button 
-              onClick={() => scroll('left')}
-              variant="light"
-              className="position-absolute start-0 top-50 translate-middle-y rounded-circle shadow-sm d-flex align-items-center justify-content-center"
-              style={{ 
-                width: '36px', 
-                height: '36px',
-                zIndex: 10,
-                opacity: 0.9
-              }}
-              aria-label="Previous card"
-            >
-              <FiChevronLeft />
-            </Button>
-            <Button 
-              onClick={() => scroll('right')}
-              variant="light"
-              className="position-absolute end-0 top-50 translate-middle-y rounded-circle shadow-sm d-flex align-items-center justify-content-center"
-              style={{ 
-                width: '36px', 
-                height: '36px',
-                zIndex: 10,
-                opacity: 0.9
-              }}
-              aria-label="Next card"
-            >
-              <FiChevronRight />
-            </Button>
-          </>
-        )}
-
-        {/* Card indicators for mobile */}
-        {isMobile && cards.length > 1 && (
-          <div className="d-flex justify-content-center gap-2 mt-2">
-            {cards.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => scrollToCard(index)}
-                className={`btn p-0 ${activeCard === index ? 'opacity-100' : 'opacity-50'}`}
-                aria-label={`Go to card ${index + 1}`}
-              >
-                <div 
-                  style={{
-                    width: activeCard === index ? '16px' : '8px',
-                    height: '8px',
-                    borderRadius: '4px',
-                    backgroundColor: activeCard === index ? currentCard.bg : '#ccc',
-                    transition: 'all 0.3s ease'
-                  }}
-                />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <Row className="g-4">
-        {/* Card Summary */}
-        <Col xs={12} lg={4}>
-          <Card className="h-100 border-0 shadow-sm">
-            <Card.Body className="p-3 p-md-4">
-              <h6 className="text-muted mb-3">Card Summary</h6>
-              <div className="mb-4">
-                <div className="d-flex justify-content-between mb-1">
-                  <small className="text-muted">Current Balance</small>
-                  <small className="fw-bold">₹{currentCard.balance}</small>
-                </div>
-                <ProgressBar 
-                  now={85} 
-                  variant="primary" 
-                  style={{ height: '6px', borderRadius: '3px' }} 
-                  className="bg-light"
-                />
-              </div>
-              <div className="mb-4">
-                <div className="d-flex justify-content-between mb-1">
-                  <small className="text-muted">Available Balance</small>
-                  <small className="fw-bold">₹{currentCard.available}</small>
-                </div>
-                <ProgressBar 
-                  now={65} 
-                  variant="success" 
-                  style={{ height: '6px', borderRadius: '3px' }} 
-                  className="bg-light"
-                />
-              </div>
-              <div className="d-flex justify-content-between align-items-center">
-                <div className="text-center">
-                  <div className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style={{ width: '40px', height: '40px' }}>
-                    <FiDollarSign className="text-primary" />
-                  </div>
-                  <div>
-                    <small className="d-block text-muted">Spent</small>
-                    <small className="fw-bold">₹{Math.round(parseInt(currentCard.balance.replace(/[^0-9]/g, '')) * 0.15).toLocaleString()}</small>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style={{ width: '40px', height: '40px' }}>
-                    <FiBarChart2 className="text-success" />
-                  </div>
-                  <div>
-                    <small className="d-block text-muted">Limit</small>
-                    <small className="fw-bold">₹{parseInt(currentCard.balance.replace(/[^0-9]/g, '')).toLocaleString()}</small>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style={{ width: '40px', height: '40px' }}>
-                    <FiClock className="text-warning" />
-                  </div>
-                  <div>
-                    <small className="d-block text-muted">Due in</small>
-                    <small className="fw-bold">12 days</small>
-                  </div>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-
-        {/* Recent Transactions */}
-        <Col xs={12} lg={8}>
-          <Card className="h-100 border-0 shadow-sm">
-            <Card.Body className="p-3 p-md-4">
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <h6 className="mb-0">Recent Transactions</h6>
-                <Button variant="link" size="sm" className="text-decoration-none p-0">
-                  View All
-                </Button>
-              </div>
-              
-              <div className="transaction-list">
-                {currentCard.transactions.map((tx) => (
-                  <div key={tx.id} className="d-flex align-items-center justify-content-between py-3 border-bottom">
-                    <div className="d-flex align-items-center">
-                      <div className="rounded-circle d-flex align-items-center justify-content-center me-3" 
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          backgroundColor: '#f8f9fa'
-                        }}
-                      >
-                        {tx.icon}
-                      </div>
-                      <div>
-                        <div className="fw-medium">{tx.merchant}</div>
-                        <small className="text-muted">{tx.date} • {tx.category}</small>
-                      </div>
-                    </div>
-                    <div className="fw-medium text-end">
-                      <div className={tx.amount.startsWith('-') ? 'text-danger' : 'text-success'}>{tx.amount}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Spending Breakdown */}
-      <Row className="mt-4">
-        <Col xs={12}>
-          <Card className="border-0 shadow-sm">
-            <Card.Body className="p-3 p-md-4">
-              <h6 className="mb-4">Spending Breakdown</h6>
-              <div className="row g-4">
-                <Col xs={12} md={6} lg={4}>
-                  <div className="d-flex flex-column h-100">
-                    {spendingCategories.map((category, index) => (
-                      <div key={index} className="mb-3">
-                        <div className="d-flex justify-content-between mb-1">
-                          <span className="small">{category.name}</span>
-                          <span className="small fw-medium">{category.amount}</span>
-                        </div>
-                        <ProgressBar 
-                          now={category.percentage} 
-                          variant={category.color} 
-                          style={{ height: '6px', borderRadius: '3px' }} 
-                          className="bg-light"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </Col>
-                <Col xs={12} md={6} lg={8}>
-                  <div className="d-flex flex-column h-100">
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                      <div>
-                        <h5 className="mb-0">₹{spendingTotal.toLocaleString()}</h5>
-                        <small className="text-muted">Total spent this month</small>
-                      </div>
-                      <Badge bg="light" text="dark" className="px-3 py-2">
-                        <span className="d-flex align-items-center">
-                          <span className="bg-success rounded-circle me-2" style={{width: '8px', height: '8px'}}></span>
-                          On track
-                        </span>
+                      <Badge bg={card.isActive ? 'success' : 'secondary'}>
+                        {card.isActive ? 'Active' : 'Inactive'}
                       </Badge>
                     </div>
-                    <div className="bg-light rounded-3 p-3 p-md-4 flex-grow-1 d-flex flex-column justify-content-center">
-                      <div className="text-center">
-                        <div className="mb-3">
-                          <FiBarChart2 size={32} className="text-muted" />
-                        </div>
-                        <h6 className="mb-2">Spending Insights</h6>
-                        <p className="text-muted small mb-0">
-                          You've spent 15% less this month compared to last month. Keep it up!
-                        </p>
+                    <div className="mb-3">
+                      <h4 className="mb-1">{formatCardNumber(card.cardNumber)}</h4>
+                      <small className="text-muted">Expires {card.expiryDate}</small>
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <small className="text-muted d-block">Card Holder</small>
+                        <strong>{card.cardHolder || 'N/A'}</strong>
+                      </div>
+                      <div className="text-end">
+                        <small className="text-muted d-block">Available Limit</small>
+                        <strong>₹{card.availableBalance?.toLocaleString() || '0'}</strong>
                       </div>
                     </div>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+
+          {selectedCard && (
+            <Card className="mb-4">
+              <Card.Header className="d-flex justify-content-between align-items-center">
+                <h5 className="mb-0">Recent Transactions</h5>
+                {cardTransactions.length > 0 && (
+                  <span className="text-muted">{cardTransactions.length} transactions found</span>
+                )}
+              </Card.Header>
+              <Card.Body>
+                {cardTransactions.length === 0 ? (
+                  <div className="text-center py-4">
+                    <FaCreditCard size={48} className="text-muted mb-3" />
+                    <h5>No Transactions Yet</h5>
+                    <p className="text-muted">Your credit card transactions will appear here.</p>
+                    <Button variant="outline-primary">Make a Payment</Button>
                   </div>
-                </Col>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+                ) : (
+                  <>
+                    <div className="table-responsive">
+                      <table className="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Description</th>
+                            <th>Date</th>
+                            <th className="text-end">Amount</th>
+                            <th>Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {currentTransactions.map((txn, index) => (
+                            <tr key={index}>
+                              <td>
+                                <div className="d-flex align-items-center">
+                                  {getCategoryIcon(txn.category)}
+                                  <div>
+                                    <div>{txn.description || 'Card Transaction'}</div>
+                                    <small className="text-muted">{txn.category || 'Other'}</small>
+                                  </div>
+                                </div>
+                              </td>
+                              <td>
+                                <div className="d-flex align-items-center">
+                                  <FaCalendarAlt className="me-2 text-muted" />
+                                  {new Date(txn.date || txn.createdAt).toLocaleDateString()}
+                                </div>
+                              </td>
+                              <td className={`text-end fw-bold ${txn.type === 'credit' ? 'text-success' : 'text-danger'}`}>
+                                {txn.type === 'credit' ? '+' : '-'}₹{Math.abs(txn.amount).toLocaleString()}
+                              </td>
+                              <td>
+                                <Badge bg={txn.status === 'completed' ? 'success' : 'warning'}>
+                                  {txn.status || 'pending'}
+                                </Badge>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    {totalPages > 1 && (
+                      <div className="d-flex justify-content-center mt-4">
+                        <Pagination>
+                          <Pagination.Prev 
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                          />
+                          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                            const pageNum = currentPage <= 3 
+                              ? i + 1 
+                              : Math.max(1, Math.min(currentPage - 2 + i, totalPages));
+                            
+                            if (i === 4 && currentPage < totalPages - 2) {
+                              return (
+                                <React.Fragment key="ellipsis">
+                                  <Pagination.Ellipsis />
+                                  <Pagination.Item 
+                                    active={pageNum === currentPage}
+                                    onClick={() => setCurrentPage(totalPages)}
+                                  >
+                                    {totalPages}
+                                  </Pagination.Item>
+                                </React.Fragment>
+                              );
+                            }
+                            
+                            return (
+                              <Pagination.Item 
+                                key={pageNum}
+                                active={pageNum === currentPage}
+                                onClick={() => setCurrentPage(pageNum)}
+                              >
+                                {pageNum}
+                              </Pagination.Item>
+                            );
+                          })}
+                          <Pagination.Next 
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                          />
+                        </Pagination>
+                      </div>
+                    )}
+                  </>
+                )}
+              </Card.Body>
+            </Card>
+          )}
+        </>
+      )}
+
+      {/* Add Credit Card Modal */}
+      <Modal show={showAddCard} onHide={() => setShowAddCard(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Add New Credit Card</Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleAddCard}>
+          <Modal.Body>
+            {accounts.length === 0 ? (
+              <Alert variant="warning">
+                You don't have any bank accounts. Please add a bank account first.
+              </Alert>
+            ) : (
+              <>
+                <Form.Group className="mb-3">
+                  <Form.Label>Link to Bank Account</Form.Label>
+                  <Form.Select 
+                    name="accountId" 
+                    value={formData.accountId}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select Bank Account</option>
+                    {accounts.map(account => (
+                      <option key={account.id} value={account.id}>
+                        {account.bankName} - {account.accountNumber.slice(-4)} ({account.accountType})
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Card Network</Form.Label>
+                  <Form.Select 
+                    name="cardNetwork" 
+                    value={formData.cardNetwork}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="VISA">VISA</option>
+                    <option value="Mastercard">Mastercard</option>
+                    <option value="RuPay">RuPay</option>
+                    <option value="American Express">American Express</option>
+                  </Form.Select>
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Cardholder Name</Form.Label>
+                  <Form.Control 
+                    type="text" 
+                    name="cardHolder" 
+                    value={formData.cardHolder || (currentUser?.name || '')}
+                    onChange={handleInputChange}
+                    placeholder="Enter cardholder name"
+                    required
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Credit Limit (₹)</Form.Label>
+                  <Form.Control 
+                    type="number" 
+                    name="spendingLimit" 
+                    value={formData.spendingLimit}
+                    onChange={handleInputChange}
+                    min="1000"
+                    step="1000"
+                    required
+                  />
+                  <Form.Text className="text-muted">
+                    Minimum credit limit is ₹1,000
+                  </Form.Text>
+                </Form.Group>
+
+                <Form.Check 
+                  type="switch"
+                  id="isVirtual"
+                  name="isVirtual"
+                  label="This is a virtual card"
+                  checked={formData.isVirtual}
+                  onChange={handleInputChange}
+                  className="mb-3"
+                />
+              </>
+            )}
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowAddCard(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="primary" 
+              type="submit" 
+              disabled={accounts.length === 0 || loading}
+            >
+              {loading ? (
+                <>
+                  <Spinner as="span" size="sm" animation="border" role="status" className="me-2" />
+                  Adding...
+                </>
+              ) : (
+                'Add Credit Card'
+              )}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
     </Container>
   );
-}
+};
+
+export default CreditCardsPage;

@@ -1,160 +1,227 @@
-import React from 'react';
-import { FiMenu, FiBell, FiSettings, FiSun, FiMoon } from 'react-icons/fi';
-import { useTheme } from '../context/ThemeContext';
-import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
-import LogoutButton from './LogoutButton';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../features/auth/authSlice';
+import { 
+  HiOutlineBell, 
+  HiOutlineMenu, 
+  HiOutlineX,
+  HiOutlineUser,
+  HiOutlineCog,
+  HiOutlineLogout,
+  HiOutlineChevronDown
+} from 'react-icons/hi';
 
-const Header = ({ onToggleSidebar }) => {
-  const location = useLocation();
-  const { theme, toggleTheme } = useTheme();
-  const { user } = useSelector((state) => state.auth);
+const Header = ({ onToggleSidebar, isSidebarOpen, user }) => {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const notificationsRef = useRef(null);
+  const profileMenuRef = useRef(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // Handle window resize for mobile detection
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobileView = window.innerWidth < 992;
+      setIsMobile(isMobileView);
+      
+      // Close dropdowns when switching to mobile
+      if (isMobileView && (showNotifications || showProfileMenu)) {
+        setShowNotifications(false);
+        setShowProfileMenu(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [showNotifications, showProfileMenu]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, []);
+
+  // Close dropdowns when navigating
+  useEffect(() => {
+    setShowNotifications(false);
+    setShowProfileMenu(false);
+  }, [navigate]);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
+
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+    if (showProfileMenu) setShowProfileMenu(false);
+  };
+
+  const toggleProfileMenu = () => {
+    setShowProfileMenu(!showProfileMenu);
+    if (showNotifications) setShowNotifications(false);
+  };
+
   const userData = user && typeof user === 'string' ? JSON.parse(user) : user;
 
   return (
-    <header className={theme === 'dark' ? 'bg-dark' : 'bg-light'}>
-      <div className="header-container">
-        {/* Mobile menu button */}
-        <button 
-          className="btn btn-menu d-lg-none"
-          onClick={onToggleSidebar}
-          aria-label="Toggle navigation"
-        >
-          <FiMenu size={20} className={theme === 'dark' ? 'text-light' : 'text-dark'} />
-        </button>
-        
-        {/* Page Title - visible on all screens */}
-        <div className="ms-2">
-          <h5 className="mb-0 fw-bold" style={{ 
-            color: theme === 'dark' ? '#fff' : '#000',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            maxWidth: '200px'
-          }}>
-            {(() => {
-              const path = location.pathname.split('/').pop();
-              if (path === 'dashboard' || path === '') return 'Dashboard';
-              return path.split('-').map(word => 
-                word.charAt(0).toUpperCase() + word.slice(1)
-              ).join(' ');
-            })()}
-          </h5>
-        </div>
-
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center',
-          marginLeft: 'auto',
-          gap: '0.5rem'
-        }}>
-          {/* Theme Toggle */}
-          <button 
-            className="btn btn-link p-1 me-2 text-decoration-none"
-            onClick={toggleTheme}
-            aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              border: 'none',
-              background: 'none'
-            }}
-          >
-            {theme === 'light' ? (
-              <FiMoon size={20} className="text-dark" />
-            ) : (
-              <FiSun size={20} className="text-light" />
-            )}
-          </button>
-
-          {/* Notifications */}
-          <div className="position-relative me-2">
+    <header className="app-header bg-white shadow-sm">
+      <div className="container-fluid h-100">
+        <div className="header-content h-100 d-flex align-items-center justify-content-between px-3">
+          <div className="header-left d-flex align-items-center">
             <button 
-              className="btn p-1"
-              style={{ 
-                background: 'none',
-                border: 'none',
-                color: theme === 'dark' ? '#fff' : '#000',
-                position: 'relative'
-              }}
+              className="menu-toggle btn btn-link text-dark p-2 me-2" 
+              onClick={onToggleSidebar}
+              aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={isSidebarOpen}
             >
-              <FiBell size={20} />
-              <span 
-                className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                style={{ fontSize: '0.6rem' }}
-              >
-                3
-              </span>
+              {isSidebarOpen ? <HiOutlineX size={24} /> : <HiOutlineMenu size={24} />}
             </button>
+            <h1 className="page-title mb-0 fs-5 fw-bold d-none d-md-block">
+              <Link to="/dashboard" className="text-decoration-none text-dark">
+                Online Banking
+              </Link>
+            </h1>
           </div>
-
-          {/* Settings */}
-          <div className="dropdown">
-            <button 
-              className="btn p-1"
-              style={{ 
-                background: 'none',
-                border: 'none',
-                color: theme === 'dark' ? '#fff' : '#000'
-              }}
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
-              <FiSettings size={20} />
-            </button>
-            <ul className="dropdown-menu dropdown-menu-end">
-              <li><a className="dropdown-item" href="#">Settings</a></li>
-              <li><a className="dropdown-item" href="#">Profile</a></li>
-              <li><hr className="dropdown-divider" /></li>
-              <li><LogoutButton /></li>
-            </ul>
-          </div>
-
-          {/* User Profile */}
-          <div className="dropdown">
-            <button 
-              className="btn p-0"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-              style={{ 
-                background: 'none',
-                border: 'none',
-                padding: '0.25rem',
-                borderRadius: '50%'
-              }}
-            >
-              <div
-                className="rounded-circle overflow-hidden"
-                style={{
-                  width: '36px',
-                  height: '36px',
-                  border: `2px solid ${theme === 'dark' ? '#495057' : '#e9ecef'}`,
-                }}
+          
+          <div className="header-right d-flex align-items-center">
+            <div className="notifications me-2 me-lg-3" ref={notificationsRef}>
+              <button 
+                className="btn btn-link text-dark position-relative p-2"
+                onClick={toggleNotifications}
+                aria-label="Notifications"
+                aria-expanded={showNotifications}
               >
-                <img
-                  src={userData?.avatar || 'https://via.placeholder.com/36'}
-                  alt="Profile"
-                  className="w-100 h-100"
-                  style={{ objectFit: 'cover' }}
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = 'https://via.placeholder.com/36';
-                  }}
-                />
-              </div>
-            </button>
-            <ul className="dropdown-menu dropdown-menu-end">
-              <li className="px-3 py-2">
-                <h6 className="mb-0">{userData?.name || 'User'}</h6>
-                <small className="text-muted">{userData?.email || ''}</small>
-              </li>
-              <li><hr className="dropdown-divider m-0" /></li>
-              <li><a className="dropdown-item" href="#">My Profile</a></li>
-              <li><a className="dropdown-item" href="#">Account Settings</a></li>
-              <li><hr className="dropdown-divider m-0" /></li>
-              <li className="px-2"><LogoutButton className="w-100" /></li>
-            </ul>
+                <HiOutlineBell size={20} />
+                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  3<span className="visually-hidden">unread notifications</span>
+                </span>
+              </button>
+              
+              {showNotifications && (
+                <div className="dropdown-menu dropdown-menu-end shadow show" style={{ width: '320px', maxWidth: '90vw' }}>
+                  <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
+                    <h6 className="mb-0 fw-bold">Notifications</h6>
+                    <button 
+                      className="btn btn-sm btn-link p-0 text-decoration-none"
+                      onClick={() => setShowNotifications(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    <Link to="/notifications/1" className="dropdown-item d-flex align-items-start p-3 border-bottom" onClick={() => setShowNotifications(false)}>
+                      <div className="flex-shrink-0 me-3">
+                        <div className="bg-primary bg-opacity-10 p-2 rounded">
+                          <HiOutlineBell className="text-primary" />
+                        </div>
+                      </div>
+                      <div className="flex-grow-1">
+                        <p className="mb-1">Your account has been updated successfully</p>
+                        <small className="text-muted">2 hours ago</small>
+                      </div>
+                    </Link>
+                    <Link to="/notifications/2" className="dropdown-item d-flex align-items-start p-3 border-bottom" onClick={() => setShowNotifications(false)}>
+                      <div className="flex-shrink-0 me-3">
+                        <div className="bg-warning bg-opacity-10 p-2 rounded">
+                          <HiOutlineBell className="text-warning" />
+                        </div>
+                      </div>
+                      <div className="flex-grow-1">
+                        <p className="mb-1">New login detected from a new device</p>
+                        <small className="text-muted">1 day ago</small>
+                      </div>
+                    </Link>
+                  </div>
+                  <div className="text-center p-2 border-top">
+                    <Link to="/notifications" className="btn btn-link text-decoration-none" onClick={() => setShowNotifications(false)}>
+                      View all notifications
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="user-menu" ref={profileMenuRef}>
+              <button 
+                className="btn btn-link text-dark text-decoration-none d-flex align-items-center p-2"
+                onClick={toggleProfileMenu}
+                aria-expanded={showProfileMenu}
+                aria-label="User menu"
+              >
+                <div className="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style={{ width: '36px', height: '36px' }}>
+                  {userData?.avatar ? (
+                    <img 
+                      src={userData.avatar} 
+                      alt={userData.name || 'User'} 
+                      width="36"
+                      height="36"
+                      className="rounded-circle"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <span className="text-primary fw-bold">
+                      {userData?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
+                  )}
+                </div>
+                <span className="ms-2 d-none d-lg-inline">
+                  {userData?.name || 'User'}
+                </span>
+                <HiOutlineChevronDown className={`ms-1 ${showProfileMenu ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {showProfileMenu && (
+                <div className="dropdown-menu dropdown-menu-end shadow show" style={{ minWidth: '200px' }}>
+                  <div className="dropdown-header">
+                    <h6 className="mb-0">{userData?.name || 'User'}</h6>
+                    <small className="text-muted">{userData?.email || 'user@example.com'}</small>
+                  </div>
+                  <div className="dropdown-divider"></div>
+                  <Link 
+                    to="/profile" 
+                    className="dropdown-item d-flex align-items-center" 
+                    onClick={() => setShowProfileMenu(false)}
+                  >
+                    <HiOutlineUser className="me-2" />
+                    <span>My Profile</span>
+                  </Link>
+                  <Link 
+                    to="/settings" 
+                    className="dropdown-item d-flex align-items-center"
+                    onClick={() => setShowProfileMenu(false)}
+                  >
+                    <HiOutlineCog className="me-2" />
+                    <span>Settings</span>
+                  </Link>
+                  <div className="dropdown-divider"></div>
+                  <button 
+                    className="dropdown-item d-flex align-items-center text-danger"
+                    onClick={handleLogout}
+                  >
+                    <HiOutlineLogout className="me-2" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -162,4 +229,4 @@ const Header = ({ onToggleSidebar }) => {
   );
 };
 
-export default Header;
+export default React.memo(Header);

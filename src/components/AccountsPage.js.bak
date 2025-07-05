@@ -1,0 +1,1243 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { 
+  Container, Row, Col, Card, Button, ListGroup, Spinner, Alert, 
+  Modal, Form, Accordion 
+} from 'react-bootstrap';
+import { 
+  Plus as PlusIcon, 
+  CreditCard as CreditCardIcon, 
+  Wallet as WalletIcon, 
+  Landmark as BankIcon, 
+  ArrowUpRight as ArrowUpRightIcon,
+  ArrowDownLeft as ArrowDownLeftIcon,
+  MoreHorizontal as MoreHorizontalIcon,
+  ArrowRight as ArrowRightIcon,
+  FileText as FileEarmarkText,
+} from 'lucide-react';
+import { ArrowRepeat } from 'react-bootstrap-icons';
+import { formatCurrency, formatDate } from '../utils/formatters';
+import { ToastContainer as ToastifyContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+// Import API services
+import api, { accountsAPI } from '../services/api';
+import '../styles/addbankaccount.css';
+
+const AccountsPage = () => {
+  // Get user from Redux store
+  const { user } = useSelector((state) => state.auth);
+  console.log('AccountsPage - User from Redux:', user);
+  
+  // State for UI
+  const [selectedBankAccount, setSelectedBankAccount] = useState(null);
+  
+  // State for bank accounts and cards
+  const [bankAccounts, setBankAccounts] = useState([]);
+  const [selectedBankAccountForCard, setSelectedBankAccountForCard] = useState(null);
+  
+  // Debug effect to log when selectedBankAccountForCard changes
+  useEffect(() => {
+    console.log('selectedBankAccountForCard changed:', selectedBankAccountForCard);
+  }, [selectedBankAccountForCard]);
+  
+  const [transactions, setTransactions] = useState([]);
+  const [invoices, setInvoices] = useState([]);
+  
+  // Loading & Error State
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
+  // Modal State
+  const [showAddAccountModal, setShowAddAccountModal] = useState(false);
+  const [showAddCardModal, setShowAddCardModal] = useState(false);
+  
+  // State for bank options and card types
+  const [bankOptions, setBankOptions] = useState([]);
+  const [cardTypes, setCardTypes] = useState([]);
+
+  // Fetch data when component mounts or user changes
+  useEffect(() => {
+    let isMounted = true;
+    
+    const fetchData = async () => {
+      // Get user ID from Redux store
+      const currentUserId = user?.id;
+      
+      if (!currentUserId) {
+        const errorMsg = 'User ID not available in Redux store, skipping data fetch';
+        console.error(errorMsg);
+        console.log('Current user object from Redux:', user);
+        if (isMounted) {
+          setError(errorMsg);
+          setLoading(false);
+        }
+        return;
+      }
+      
+      console.log(`[AccountsPage] Fetching data for user ID:`, currentUserId);
+      setLoading(true);
+      setError('');
+      
+      try {
+        console.log('[AccountsPage] 1. Starting data fetch process...');
+        
+        // Fetch bank accounts with cards
+        console.log('[AccountsPage] 2. Starting to fetch bank accounts...');
+        const accounts = await accountsAPI.fetchBankAccounts(currentUserId);
+        
+        console.log('[AccountsPage] 3. Fetched bank accounts:', {
+          isArray: Array.isArray(accounts),
+          count: Array.isArray(accounts) ? accounts.length : 0,
+          accounts: accounts || []
+        });
+        
+        if (!isMounted) return;
+        
+        // Format accounts data
+        const formattedAccounts = Array.isArray(accounts) 
+          ? accounts.map(account => ({
+              ...account,
+              id: account.id || `acc_${Date.now()}`,
+              balance: Number(account.balance) || 0,
+              accountNumber: account.accountNumber || '****' + (account.id ? account.id.toString().slice(-4) : '0000'),
+              accountType: account.accountType || 'Savings',
+              bankName: account.bankName || 'Unknown Bank',
+              holderName: account.accountName || account.holderName || (user?.name || 'Account Holder'),
+              ifsc: account.ifscCode || account.ifsc || 'N/A',
+              branch: account.branch || 'N/A',
+              openingDate: account.openingDate || new Date().toISOString().split('T')[0],
+              color: account.color || '#4e73df',
+              currency: account.currency || 'INR',
+              isActive: account.isActive !== false,
+              cards: Array.isArray(account.cards) ? account.cards.map(card => ({
+                ...card,
+                cardType: card.cardType || 'debit',
+                cardNetwork: card.cardNetwork || 'VISA',
+                cardHolder: card.cardHolder || user?.name || 'Card Holder',
+                expiryDate: card.expiryDate || 'MM/YY',
+                isActive: card.isActive !== false
+              })) : []
+            }))
+          : [];
+        
+        console.log('[AccountsPage] 4. Formatted accounts:', formattedAccounts);
+        
+        if (isMounted) {
+          setBankAccounts(formattedAccounts);
+          
+          // Set the first account as selected by default if available
+          if (formattedAccounts.length > 0) {
+            setSelectedBankAccount(formattedAccounts[0]);
+          }
+        }
+        
+        if (!isMounted) {
+          console.log('[AccountsPage] Component unmounted, aborting');
+          return;
+        }
+        
+        if (!Array.isArray(accounts)) {
+          const errorMsg = `Expected array of bank accounts but got: ${typeof accounts}`;
+          console.error('[AccountsPage]', errorMsg, accounts);
+          throw new Error(errorMsg);
+        }
+        
+        console.log(`[AccountsPage] 4. Processing ${accounts.length} bank accounts`);
+        
+        // Format accounts data for the UI
+        const formattedAccounts = accounts
+          .map((account, index) => {
+            console.log(`[AccountsPage] 5.1 Processing account ${index + 1}/${accounts.length}:`, {
+              id: account?.id,
+              type: typeof account,
+              isObject: account && typeof account === 'object',
+              hasCards: Array.isArray(account?.cards),
+              cardCount: account?.cards?.length || 0
+            });
+            
+            if (!account || typeof account !== 'object') {
+              console.error('[AccountsPage] 5.2 Invalid account data, skipping:', account);
+              return null;
+            }
+            
+            console.log(`[AccountsPage] 5.3 Account ${index + 1} details:`, {
+              id: account.id,
+              accountNumber: account.accountNumber,
+              bankName: account.bankName,
+              balance: account.balance,
+              cardCount: account.cards?.length || 0,
+              hasCards: Array.isArray(account.cards)
+            });
+            
+            try {
+              const formattedAccount = {
+                ...account,
+                id: account.id || `acc_${Date.now()}`,
+                balance: Number(account.balance) || 0,
+                accountNumber: account.accountNumber || '****' + (account.id ? account.id.toString().slice(-4) : '0000'),
+                accountType: account.accountType || 'Savings',
+                bankName: account.bankName || 'Unknown Bank',
+                holderName: account.accountName || account.holderName || (user?.name || 'Account Holder'),
+                ifsc: account.ifscCode || account.ifsc || 'N/A',
+                branch: account.branch || 'N/A',
+                openingDate: account.openingDate || new Date().toISOString().split('T')[0],
+                color: account.color || '#4e73df',
+                currency: account.currency || 'INR',
+                isActive: account.isActive !== undefined ? account.isActive : true,
+                cards: Array.isArray(account.cards) ? account.cards : []
+              };
+              
+              console.log(`[AccountsPage] 5.4 Formatted account ${index + 1}:`, {
+                id: formattedAccount.id,
+                bankName: formattedAccount.bankName,
+                accountNumber: formattedAccount.accountNumber,
+                balance: formattedAccount.balance,
+                cardCount: formattedAccount.cards.length
+              });
+              
+              return formattedAccount;
+            } catch (formatError) {
+              console.error(`[AccountsPage] Error formatting account ${index + 1}:`, {
+                error: formatError,
+                accountData: account
+              });
+              return null;
+            }
+          })
+          .filter(Boolean); // Remove any null entries
+      
+        console.log('[AccountsPage] 6. All formatted accounts:', {
+          count: formattedAccounts.length,
+          accounts: formattedAccounts.map(acc => ({
+            id: acc?.id,
+            bankName: acc?.bankName,
+            accountNumber: acc?.accountNumber,
+            balance: acc?.balance,
+            cardCount: acc?.cards?.length || 0
+          }))
+        });
+        
+        if (isMounted) {
+          setBankAccounts(formattedAccounts);
+        }
+      
+        // Fetch bank options and card types in parallel
+        console.log('[AccountsPage] Fetching bank options and card types...');
+        const [bankOptionsRes, cardTypesRes] = await Promise.all([
+          api.get('/bankOptions').catch(() => ({ data: [] })),
+          api.get('/cardTypes').catch(() => ({ data: [] }))
+        ]);
+        
+        if (!isMounted) return;
+        
+        setBankOptions(Array.isArray(bankOptionsRes?.data) ? bankOptionsRes.data : []);
+        setCardTypes(Array.isArray(cardTypesRes?.data) ? cardTypesRes.data : []);
+      } catch (error) {
+      console.error('[AccountsPage] Error fetching data:', {
+        error,
+        message: error.message,
+        stack: error.stack,
+        response: error.response?.data
+      });
+      
+      if (isMounted) {
+        const errorMsg = error.response?.data?.message || 
+                       error.message || 
+                       'Failed to load bank accounts. Please try again.';
+        
+        setError(errorMsg);
+        setBankAccounts([]);
+        setLoading(false);
+        
+        // Fallback to default options if fetch fails
+        setBankOptions([
+          { id: 'hdfc', name: 'HDFC Bank', icon: 'fa-university' },
+          { id: 'sbi', name: 'State Bank of India', icon: 'fa-building' },
+          { id: 'icici', name: 'ICICI Bank', icon: 'fa-piggy-bank' },
+          { id: 'axis', name: 'Axis Bank', icon: 'fa-landmark' },
+          { id: 'other', name: 'Other Bank', icon: 'fa-university' }
+        ]);
+        
+        setCardTypes([
+          { id: 'visa', name: 'Visa', icon: 'fa-cc-visa' },
+          { id: 'mastercard', name: 'Mastercard', icon: 'fa-cc-mastercard' },
+          { id: 'rupay', name: 'RuPay', icon: 'fa-credit-card' },
+          { id: 'amex', name: 'American Express', icon: 'fa-cc-amex' }
+        ]);
+      }
+      
+      // Show error toast with the error message
+      const errorMessage = error?.response?.data?.message || error?.message || 'An error occurred';
+      toast.error(errorMessage, {
+        position: 'bottom-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    } finally {
+      if (isMounted) {
+        console.log('[AccountsPage] Finished loading data');
+        setLoading(false);
+      }
+    }
+  };
+  fetchData()
+  // Cleanup function
+  return () => {
+    isMounted = false;
+  };
+}, [user?.id]); // Only re-run if user.id changes
+ 
+  // State for form data
+  const [bankFormData, setBankFormData] = useState({
+    bankId: '',
+    accountNumber: '',
+    accountType: 'Savings',
+    ifsc: '',
+    branch: '',
+    openingDate: new Date().toISOString().split('T')[0],
+    holderName: user?.name || '',
+    balance: '0.00'
+  });
+  
+  const [cardFormData, setCardFormData] = useState({
+    bankAccountId: '',
+    cardType: 'visa',
+    cardNumber: '',
+    expiryDate: '',
+    cvv: '',
+    cardHolder: ''
+  });
+
+  // Initialize with sample data
+  useEffect(() => {
+    const initialTransactions = [
+      {
+        id: 1,
+        icon: <i className="fab fa-spotify text-success" style={{ fontSize: '24px' }}></i>,
+        name: "Spotify Subscription",
+        date: "25 Jan 2021",
+        category: "Entertainment",
+        card: "1234 ****",
+        status: "Completed",
+        amount: "-₹150"
+      },
+      {
+        id: 2,
+        icon: <i className="fas fa-phone text-primary" style={{ fontSize: '24px' }}></i>,
+        name: "Mobile Recharge",
+        date: "24 Jan 2021",
+        category: "Mobile",
+        card: "5678 ****",
+        status: "Completed",
+        amount: "-₹399"
+      },
+      {
+        id: 3,
+        icon: <i className="fas fa-user-plus text-success" style={{ fontSize: '24px' }}></i>,
+        name: "Salary Credit",
+        date: "23 Jan 2021",
+        category: "Income",
+        card: "",
+        status: "Credited",
+        amount: "+₹75,000"
+      }
+    ];
+
+    const initialInvoices = [
+      {
+        id: 1,
+        invoiceNo: "#INV-2021-001",
+        client: "John Doe",
+        amount: "₹5,000",
+        status: "Paid",
+        date: "25 Jan 2021"
+      },
+      {
+        id: 2,
+        invoiceNo: "#INV-2021-002",
+        client: "Jane Smith",
+        amount: "₹3,500",
+        status: "Pending",
+        date: "20 Jan 2021"
+      }
+    ];
+
+    setTransactions(initialTransactions);
+    setInvoices(initialInvoices);
+  }, []);
+
+  // State for summary cards
+  const [summaryCards, setSummaryCards] = useState([]);
+
+  // Calculate summary data
+  const summaryData = useMemo(() => {
+    const totalBalance = bankAccounts.reduce((sum, account) => sum + (parseFloat(account.balance) || 0), 0);
+    const totalIncome = (user?.transactions || [])
+      .filter(tx => tx.type === 'income')
+      .reduce((sum, tx) => sum + (parseFloat(tx.amount) || 0), 0);
+      
+    const totalExpense = (user?.transactions || [])
+      .filter(tx => tx.type === 'expense')
+      .reduce((sum, tx) => sum + (parseFloat(tx.amount) || 0), 0);
+    
+    const totalCards = bankAccounts.reduce(
+      (sum, account) => sum + (account.cards?.length || 0), 
+      0
+    );
+    
+    return {
+      totalBalance,
+      totalIncome,
+      totalExpense,
+      totalAccounts: bankAccounts.length,
+      totalCards,
+      cardTypes: new Set(bankAccounts.flatMap(acc => acc.cards?.map(card => card.type) || [])).size
+    };
+  }, [bankAccounts, user?.transactions]);
+
+  // Fetch summary cards from the database
+  useEffect(() => {
+    if (user?.summaryCards) {
+      const updatedCards = user.summaryCards.map(card => {
+        let amount = '';
+        
+        switch(card.title) {
+          case 'Total Balance':
+            amount = formatCurrency(summaryData.totalBalance);
+            break;
+          case 'Bank Accounts':
+            amount = summaryData.totalAccounts;
+            break;
+          case 'Active Cards':
+            amount = summaryData.totalCards;
+            break;
+          case 'Card Types':
+            amount = summaryData.cardTypes;
+            break;
+          default:
+            amount = '0';
+        }
+        
+        return {
+          ...card,
+          amount,
+          icon: (
+            <i 
+              className={`fas fa-${card.icon} ${card.textClass}`} 
+              style={{ fontSize: '24px' }}
+            />
+          )
+        };
+      });
+      
+      setSummaryCards(updatedCards);
+    }
+  }, [user?.summaryCards, summaryData]);
+
+  // Handle form input changes
+  const handleBankFormChange = (e) => {
+    const { name, value } = e.target;
+    setBankFormData({
+      ...bankFormData,
+      [name]: value
+    });
+  };
+
+  
+
+  // Handle form submissions
+  const handleBankAccountSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
+      
+      // Get the selected bank details
+      const selectedBank = bankOptions.find(bank => bank.id === bankFormData.bankId);
+      
+      // Create new account object with user ID
+      const newAccount = {
+        userId: user.id, // Add user ID to the account data
+        bankName: selectedBank?.name || 'Bank',
+        accountNumber: bankFormData.accountNumber,
+        accountType: bankFormData.accountType,
+        holderName: bankFormData.holderName,
+        ifsc: bankFormData.ifsc,
+        branch: bankFormData.branch,
+        openingDate: bankFormData.openingDate,
+        balance: parseFloat(bankFormData.balance) || 0,
+        cards: []
+      };
+      
+      // Call the API to add the account
+      const addedAccount = await accountsAPI.addAccount(newAccount);
+      
+      // Refresh the accounts list
+      const updatedAccounts = await accountsAPI.getUserAccounts(user.id);
+      setBankAccounts(updatedAccounts);
+      
+      // Reset form
+      setBankFormData({
+        bankId: '',
+        accountNumber: '',
+        accountType: 'Savings',
+        ifsc: '',
+        branch: '',
+        openingDate: new Date().toISOString().split('T')[0],
+        holderName: user?.name || '',
+        balance: '0.00'
+      });
+      
+      // Close modal
+      setShowAddAccountModal(false);
+      
+      // Show success toast
+      toast.success('Bank account added successfully!', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+      
+    } catch (error) {
+      console.error('Error adding bank account:', error);
+      // Show error toast
+      toast.error(error.message || 'Failed to add bank account. Please try again.', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
+  };
+  const handleCardFormChange = (e) => {
+    const { name, value } = e.target;
+    setCardFormData(prevState => ({
+      ...prevState,
+      [name]: value
+    }));
+  };
+  const handleCardSubmit = async (e) => {
+    e.preventDefault();
+    
+    try {
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
+      
+      if (!selectedBankAccountForCard?.id) {
+        console.error('No bank account selected for card. Current selectedBankAccountForCard:', selectedBankAccountForCard);
+        throw new Error('Please select a valid bank account for this card');
+      }
+
+      // Create new card object with correct property names
+      const newCard = {
+        userId: user.id,
+        bankAccountId: selectedBankAccountForCard.id, // Use the account ID
+        cardType: cardFormData.cardType,
+        cardNumber: cardFormData.cardNumber,
+        expiryDate: cardFormData.expiryDate,
+        cvv: cardFormData.cvv,
+        cardHolder: cardFormData.cardHolder
+      };
+      
+      console.log('Adding card with data:', newCard);
+      
+      // Call the API to add the card
+      const addedCard = await accountsAPI.addCard(newCard);
+      
+      // Refresh the accounts list to get the latest data
+      const updatedAccounts = await accountsAPI.getUserAccounts(user.id);
+      setBankAccounts(updatedAccounts);
+      
+      // Reset form
+      setCardFormData({
+        bankAccountId: '',
+        cardType: 'visa',
+        cardNumber: '',
+        expiryDate: '',
+        cvv: '',
+        cardHolder: ''
+      });
+      
+      setSelectedBankAccountForCard(null);
+      setShowAddCardModal(false);
+      
+      // Show success toast
+      toast.success('Card added successfully!', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+      
+    } catch (error) {
+      console.error('Error adding card:', error);
+      // Show error toast
+      toast.error(error.message || 'Failed to add card. Please try again.', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
+    }
+  };
+
+  // Test function to manually trigger the API call
+  // const testApiCall = async () => {
+  //   console.log('[Test] Manually testing API call...');
+  //   try {
+  //     // Test direct fetch
+  //     console.log('[Test] Testing direct fetch to /bankAccounts...');
+  //     const fetchResponse = await fetch('http://localhost:3001/bankAccounts');
+  //     const fetchData = await fetchResponse.json();
+  //     console.log('[Test] Direct fetch response:', fetchData);
+      
+  //     // Test axios
+  //     console.log('[Test] Testing axios.get to /bankAccounts...');
+  //     const axiosResponse = await axios.get('http://localhost:3001/bankAccounts');
+  //     console.log('[Test] Axios response:', axiosResponse.data);
+      
+  //     // Test accountsAPI
+  //     console.log('[Test] Testing accountsAPI.fetchBankAccounts...');
+  //     const accounts = await accountsAPI.fetchBankAccounts(user?.id || 1);
+  //     console.log('[Test] accountsAPI response:', accounts);
+      
+  //     alert('API test successful! Check console for details.');
+  //   } catch (error) {
+  //     console.error('[Test] API test failed:', error);
+  //     alert(`API test failed: ${error.message}`);
+  //   }
+  // };
+
+  // Render the component
+  return (
+    <Container fluid className="py-4">
+      {/* Debug Section */}
+      {/* <div className="mb-4 p-3 border rounded bg-light">
+        <h5 className="text-muted">Debug Tools</h5>
+        <Button 
+          variant="outline-primary" 
+          size="sm" 
+          onClick={testApiCall} 
+          className="me-2"
+        >
+          Test API Connection
+        </Button>
+        <Button 
+          variant="outline-secondary" 
+          size="sm" 
+          onClick={() => console.log('Current user:', user)}
+        >
+          Log User Data
+        </Button>
+      </div>
+      
+
+      <h4 className="mb-4 fw-bold">Accounts Overview</h4>
+      
+      {/* Display error message if any */}
+      {error && (
+        <Alert variant="danger" className="mb-4">
+          {error}
+        </Alert>
+      )}
+      
+      {/* Show loading spinner while fetching data */}
+      {loading && (
+        <div className="text-center my-5">
+          <Spinner animation="border" role="status" className="me-2">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+          <span>Loading bank accounts...</span>
+        </div>
+      )}
+      
+      {/* Show message if no accounts found */}
+      {!loading && !error && bankAccounts.length === 0 && (
+        <Alert variant="info" className="mb-4">
+          No bank accounts found. Click "Add Account" to get started.
+        </Alert>
+      )}
+      
+      {/* Debug: Show raw bank accounts data */}
+      {/* {process.env.NODE_ENV === 'development' && bankAccounts.length > 0 && (
+        <div className="mb-4 p-3 border rounded bg-light">
+          <h6 className="text-muted">Debug: Bank Accounts Data</h6>
+          <pre className="mb-0" style={{fontSize: '12px'}}>
+            {JSON.stringify(bankAccounts, null, 2)}
+          </pre>
+        </div>
+      )} */}
+      
+      {/* Summary Cards */}
+      <Row className="g-4 mb-4">
+        {summaryCards.map(card => (
+          <Col xs={12} sm={6} lg={3} key={card.id}>
+            <Card className="h-100 border-0 shadow-sm">
+              <Card.Body className="d-flex align-items-center">
+                <div className={`rounded-circle p-3 me-3 ${card.bg}`}>
+                  {card.icon}
+                </div>
+                <div>
+                  <h6 className="mb-1 text-muted">{card.title}</h6>
+                  <h5 className="mb-0 fw-bold">{card.amount}</h5>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+
+      <Row className="g-4">
+        {/* Left Column */}
+        <Col lg={8}>
+          {/* Bank Accounts List */}
+          <Card className="mb-4">
+            <Card.Header className="d-flex justify-content-between align-items-center">
+              <h5 className="mb-0">My Bank Accounts</h5>
+              <Button 
+                variant="primary" 
+                size="sm" 
+                onClick={() => setShowAddAccountModal(true)}
+              >
+                    <p className="text-muted">Found {bankAccounts.length} account(s)</p>
+                  </div>
+                  <div className="account-list">
+                    <Accordion defaultActiveKey="0">
+                      {bankAccounts.map((account, index) => (
+                        <Accordion.Item eventKey={String(index)} key={account.id || index}>
+                          <Accordion.Header>
+                            <div className="d-flex align-items-center w-100">
+                              <div className="me-3">
+                                <i className={`fas fa-university fa-2x text-primary`}></i>
+                              </div>
+                              <div className="flex-grow-1">
+                                <h6 className="mb-0">{account.bankName || 'Bank Account'}</h6>
+                                <small className="text-muted">•••• {account.accountNumber?.slice(-4) || '••••'}</small>
+                              </div>
+                              <div className="text-end">
+                                <h6 className="mb-0">{formatCurrency(account.balance || 0)}</h6>
+                                <small className="text-muted text-capitalize">{account.accountType || 'savings'}</small>
+                              </div>
+                            </div>
+                          </Accordion.Header>
+                          <Accordion.Body className="p-0">
+                            <ListGroup variant="flush">
+                              {/* Account Details */}
+                              <ListGroup.Item>
+                                <div className="p-3">
+                                  <h6>Account Details</h6>
+                                  <div className="row mt-3">
+                                    <div className="col-md-6">
+                                      <p className="mb-1 text-muted">Account Holder</p>
+                                      <p className="mb-3">{account.holderName || user?.name || 'N/A'}</p>
+                                      
+                                      <p className="mb-1 text-muted">Account Number</p>
+                                      <p className="mb-3">{account.accountNumber || 'N/A'}</p>
+                                      
+                                      <p className="mb-1 text-muted">IFSC Code</p>
+                                      <p className="mb-0">{account.ifsc || 'N/A'}</p>
+                                    </div>
+                                    <div className="col-md-6">
+                                      <p className="mb-1 text-muted">Account Type</p>
+                                      <p className="mb-3 text-capitalize">{account.accountType || 'N/A'}</p>
+                                      
+                                      <p className="mb-1 text-muted">Branch</p>
+                                      <p className="mb-3">{account.branch || 'N/A'}</p>
+                                      
+                                      <p className="mb-1 text-muted">Opened On</p>
+                                      <p className="mb-0">{account.openingDate ? formatDate(account.openingDate) : 'N/A'}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </ListGroup.Item>
+                              
+                              {/* Cards */}
+                              <ListGroup.Item className="border-top">
+                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                  <h6 className="mb-0">Cards</h6>
+                                  <Button 
+                                    variant="outline-primary" 
+                                    size="sm"
+                                    onClick={() => {
+                                      setSelectedBankAccount(account);
+                                      setSelectedBankAccountForCard(account);
+                                      setShowAddCardModal(true);
+                                    }}
+                                  >
+                                    <PlusIcon size={14} className="me-1" /> Add Card
+                                  </Button>
+                                </div>
+                                
+                                {account.cards?.length > 0 ? (
+                                  <Row className="g-3">
+                                    {account.cards.map((card, idx) => (
+                                      <Col md={6} key={card.id || idx}>
+                                        <Card className="border-0 shadow-sm">
+                                          <Card.Body>
+                                            <div className="d-flex justify-content-between align-items-start mb-3">
+                                              <div>
+                                                <h6 className="mb-1">{card.cardType} Card</h6>
+                                                <p className="text-muted mb-0">•••• •••• •••• {card.cardNumber?.slice(-4)}</p>
+                                              </div>
+                                              <i className={`fab ${card.cardType === 'visa' ? 'fa-cc-visa' : 'fa-cc-mastercard'} fa-2x`}></i>
+                                            </div>
+                                            <div className="d-flex justify-content-between align-items-center">
+                                              <div>
+                                                <p className="text-muted small mb-1">Card Holder</p>
+                                                <p className="mb-0">{card.cardHolder || 'N/A'}</p>
+                                              </div>
+                                              <div className="text-end">
+                                                <p className="text-muted small mb-1">Expires</p>
+                                                <p className="mb-0">{card.expiryDate || 'N/A'}</p>
+                                              </div>
+                                            </div>
+                                          </Card.Body>
+                                        </Card>
+                                      </Col>
+                                    ))}
+                                  </Row>
+                                ) : (
+                                  <div className="text-center py-4">
+                                    <CreditCardIcon size={32} className="text-muted mb-2" />
+                                    <p className="text-muted mb-0">No cards added to this account</p>
+                                  </div>
+                                )}
+                              </ListGroup.Item>
+                              
+                              {/* Quick Actions */}
+                              <ListGroup.Item className="border-top">
+                                <div className="d-flex justify-content-between">
+                                  <Button variant="outline-secondary" size="sm">
+                                    <ArrowUpRightIcon size={14} className="me-1" /> Transfer
+                                  </Button>
+                                  <Button variant="outline-secondary" size="sm">
+                                    <ArrowDownLeftIcon size={14} className="me-1" /> Request
+                                  </Button>
+                                  <Button variant="outline-secondary" size="sm">
+                                    <ArrowRepeat size={14} className="me-1" /> Statement
+                                  </Button>
+                                  <Button variant="outline-secondary" size="sm">
+                                    <MoreHorizontalIcon size={14} />
+                                  </Button>
+                                </div>
+                              </ListGroup.Item>
+                            </ListGroup>
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      ))}
+                    </Accordion>
+                  </div>
+                </>
+              )}
+            </Card.Body>
+          </Card>
+
+          {/* Recent Transactions */}
+          <Card className="border-0 shadow-sm">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h5 className="mb-0">Recent Transactions</h5>
+                <Button variant="link" className="text-decoration-none p-0">
+                  View All <ArrowRightIcon size={16} className="ms-1" />
+                </Button>
+              </div>
+              
+              {transactions.length > 0 ? (
+                <ListGroup variant="flush">
+                  {transactions.map(transaction => (
+                    <ListGroup.Item key={transaction.id} className="px-0">
+                      <div className="d-flex align-items-center">
+                        <div className="flex-shrink-0 me-3">
+                          {transaction.icon}
+                        </div>
+                        <div className="flex-grow-1">
+                          <h6 className="mb-0">{transaction.name}</h6>
+                          <small className="text-muted">{transaction.date} • {transaction.category}</small>
+                        </div>
+                        <div className="text-end">
+                          <h6 className={`mb-0 ${transaction.amount.startsWith('+') ? 'text-success' : 'text-dark'}`}>
+                            {transaction.amount}
+                          </h6>
+                          <small className="text-muted">{transaction.card}</small>
+                        </div>
+                      </div>
+                    </ListGroup.Item>
+                  ))}
+                </ListGroup>
+              ) : (
+                <div className="text-center py-4">
+                  <FileEarmarkText size={32} className="text-muted mb-2" />
+                  <p className="text-muted mb-0">No recent transactions</p>
+                </div>
+              )}
+            </Card.Body>
+          </Card>
+        </Col>
+        
+        {/* Right Column */}
+        <Col lg={4}>
+          {/* Quick Transfer */}
+          <Card className="mb-4 border-0 shadow-sm">
+            <Card.Body>
+              <h5 className="mb-4">Quick Transfer</h5>
+              <Form>
+                <Form.Group className="mb-3">
+                  <Form.Label>From Account</Form.Label>
+                  <Form.Select>
+                    <option>Select account</option>
+                    {bankAccounts.map(account => (
+                      <option key={account.id}>
+                        {account.bankName} •••• {account.accountNumber?.slice(-4)}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+                
+                <Form.Group className="mb-3">
+                  <Form.Label>To Account</Form.Label>
+                  <Form.Control type="text" placeholder="Enter account number" />
+                </Form.Group>
+                
+                <Form.Group className="mb-4">
+                  <Form.Label>Amount (₹)</Form.Label>
+                  <Form.Control type="number" placeholder="0.00" />
+                </Form.Group>
+                
+                <Button variant="primary" className="w-100">
+                  Transfer Now
+                </Button>
+              </Form>
+            </Card.Body>
+          </Card>
+          
+          {/* Invoices */}
+          <Card className="border-0 shadow-sm">
+            <Card.Body>
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h5 className="mb-0">Invoices</h5>
+                <Button variant="link" className="text-decoration-none p-0">
+                  View All <ArrowRightIcon size={16} className="ms-1" />
+                </Button>
+              </div>
+              
+              {invoices.length > 0 ? (
+                <ListGroup variant="flush">
+                  {invoices.map(invoice => (
+                    <ListGroup.Item key={invoice.id} className="px-0">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                          <h6 className="mb-0">{invoice.client}</h6>
+                          <small className="text-muted">{invoice.invoiceNo}</small>
+                        </div>
+                        <div className="text-end">
+                          <h6 className="mb-0">{invoice.amount}</h6>
+                          <small className={`badge bg-${invoice.status === 'Paid' ? 'success' : 'warning'} bg-opacity-10 text-${invoice.status === 'Paid' ? 'success' : 'warning'}`}>
+                            {invoice.status}
+                          </small>
+                        </div>
+                      </div>
+                    </ListGroup.Item>
+                  ))}
+                </ListGroup>
+              ) : (
+                <div className="text-center py-4">
+                  <FileEarmarkText size={32} className="text-muted mb-2" />
+                  <p className="text-muted mb-0">No invoices found</p>
+                </div>
+              )}
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Add Bank Account Modal */}
+      <Modal show={showAddAccountModal} onHide={() => setShowAddAccountModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Add New Bank Account</Modal.Title>
+        </Modal.Header>
+        <form onSubmit={handleBankAccountSubmit}>
+          <Modal.Body>
+            <Row className="g-3">
+              <Col md={12}>
+                <Form.Group controlId="bankId" className="mb-3">
+                  <Form.Label>Bank Name</Form.Label>
+                  <div className="bank-select-wrapper">
+                    <Form.Select 
+                      name="bankId" 
+                      value={bankFormData.bankId}
+                      onChange={handleBankFormChange}
+                      required
+                      className="form-select"
+                    >
+                      <option value="">Select a bank</option>
+                      {bankOptions.map(bank => (
+                        <option key={bank.id} value={bank.id}>
+                          <i className={`fas ${bank.icon} me-2`}></i>
+                          {bank.name}
+                        </option>
+                      ))}
+                    </Form.Select>
+                    {bankFormData.bankId && (
+                      <div className="bank-select-icon">
+                        <i className={`fas ${bankOptions.find(b => b.id === bankFormData.bankId)?.icon}`}></i>
+                      </div>
+                    )}
+                  </div>
+                </Form.Group>
+              </Col>
+              
+              <Col md={6}>
+                <Form.Group controlId="accountNumber">
+                  <Form.Label>Account Number</Form.Label>
+                  <Form.Control 
+                    type="text" 
+                    placeholder="Enter account number"
+                    value={bankFormData.accountNumber}
+                    onChange={(e) => setBankFormData({...bankFormData, accountNumber: e.target.value})}
+                  />
+                </Form.Group>
+              </Col>
+              
+              <Col md={6}>
+                <Form.Group controlId="accountType">
+                  <Form.Label>Account Type</Form.Label>
+                  <Form.Select
+                    value={bankFormData.accountType}
+                    onChange={(e) => setBankFormData({...bankFormData, accountType: e.target.value})}
+                  >
+                    <option value="savings">Savings Account</option>
+                    <option value="checking">Checking Account</option>
+                    <option value="salary">Salary Account</option>
+                    <option value="nri">NRI Account</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+              
+              <Col md={6}>
+                <Form.Group controlId="holderName">
+                  <Form.Label>Account Holder Name</Form.Label>
+                  <Form.Control 
+                    type="text" 
+                    placeholder="Enter account holder name"
+                    value={bankFormData.holderName}
+                    onChange={(e) => setBankFormData({...bankFormData, holderName: e.target.value})}
+                  />
+                </Form.Group>
+              </Col>
+              
+              <Col md={6}>
+                <Form.Group controlId="ifsc">
+                  <Form.Label>IFSC Code</Form.Label>
+                  <Form.Control 
+                    type="text" 
+                    placeholder="Enter IFSC code"
+                    value={bankFormData.ifsc}
+                    onChange={(e) => setBankFormData({...bankFormData, ifsc: e.target.value})}
+                  />
+                </Form.Group>
+              </Col>
+              
+              <Col md={6}>
+                <Form.Group controlId="branch">
+                  <Form.Label>Branch</Form.Label>
+                  <Form.Control 
+                    type="text" 
+                    placeholder="Enter branch name"
+                    value={bankFormData.branch}
+                    onChange={(e) => setBankFormData({...bankFormData, branch: e.target.value})}
+                  />
+                </Form.Group>
+              </Col>
+              
+              <Col md={6}>
+                <Form.Group controlId="openingDate">
+                  <Form.Label>Opening Date</Form.Label>
+                  <Form.Control 
+                    type="date" 
+                    value={bankFormData.openingDate}
+                    onChange={(e) => setBankFormData({...bankFormData, openingDate: e.target.value})}
+                  />
+                </Form.Group>
+              </Col>
+              
+              <Col md={12}>
+                <Form.Group controlId="balance">
+                  <Form.Label>Initial Balance (₹)</Form.Label>
+                  <Form.Control 
+                    type="number" 
+                    placeholder="0.00"
+                    value={bankFormData.balance || ''}
+                    onChange={(e) => setBankFormData({...bankFormData, balance: parseFloat(e.target.value) || 0})}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowAddAccountModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" type="submit">
+              Add Account
+            </Button>
+          </Modal.Footer>
+        </form>
+      </Modal>
+
+      {/* Add Card Modal */}
+<Modal show={showAddCardModal} onHide={() => setShowAddCardModal(false)}>
+  <Modal.Header closeButton>
+    <Modal.Title>Add New Card</Modal.Title>
+  </Modal.Header>
+  <Form onSubmit={handleCardSubmit}>
+    <Modal.Body>
+      <Form.Group className="mb-3">
+        <Form.Label>Bank Account</Form.Label>
+        <div className="border rounded p-2 bg-light">
+          <div className="d-flex align-items-center">
+            <i className={`fas fa-university fa-2x me-3 text-primary`}></i>
+            <div>
+              <h6 className="mb-0">{selectedBankAccountForCard?.bankName || 'Bank Account'}</h6>
+              <small className="text-muted">•••• {selectedBankAccountForCard?.accountNumber?.slice(-4) || '••••'}</small>
+            </div>
+          </div>
+        </div>
+      </Form.Group>
+      
+      <Form.Group className="mb-3">
+        <Form.Label>Card Type</Form.Label>
+        <div className="bank-select">
+          <select
+            className="form-select"
+            name="cardType"
+            value={cardFormData.cardType}
+            onChange={handleCardFormChange}
+            required
+          >
+            <option value="">Select Card Type</option>
+            <option value="visa">Visa</option>
+            <option value="mastercard">Mastercard</option>
+            <option value="amex">American Express</option>
+            <option value="discover">Discover</option>
+          </select>
+          <div className="select-arrow">
+            <i className="fas fa-chevron-down"></i>
+          </div>
+        </div>
+      </Form.Group>
+
+      {/* Card Number Field */}
+      <Form.Group className="mb-3">
+        <Form.Label>Card Number</Form.Label>
+        <Form.Control
+          type="text"
+          name="cardNumber"
+          placeholder="1234 5678 9012 3456"
+          value={cardFormData.cardNumber}
+          onChange={(e) => {
+            // Format card number with spaces
+            const value = e.target.value.replace(/\D/g, '').replace(/(\d{4})(?=\d)/g, '$1 ');
+            handleCardFormChange({
+              target: {
+                name: 'cardNumber',
+                value: value
+              }
+            });
+          }}
+          maxLength="19"
+          required
+        />
+      </Form.Group>
+
+      {/* Expiry Date and CVV */}
+      <Row>
+        <Col md={6}>
+          <Form.Group className="mb-3">
+            <Form.Label>Expiry Date (MM/YY)</Form.Label>
+            <Form.Control
+              type="text"
+              name="expiryDate"
+              placeholder="MM/YY"
+              value={cardFormData.expiryDate}
+              onChange={(e) => {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length > 2) {
+                  value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                }
+                handleCardFormChange({
+                  target: {
+                    name: 'expiryDate',
+                    value: value
+                  }
+                });
+              }}
+              maxLength="5"
+              required
+            />
+          </Form.Group>
+        </Col>
+        <Col md={6}>
+          <Form.Group className="mb-3">
+            <Form.Label>CVV</Form.Label>
+            <Form.Control
+              type="text"
+              name="cvv"
+              placeholder="123"
+              value={cardFormData.cvv}
+              onChange={handleCardFormChange}
+              maxLength="3"
+              pattern="\d{3}"
+              required
+            />
+          </Form.Group>
+        </Col>
+      </Row>
+
+      {/* Cardholder Name */}
+      <Form.Group className="mb-3">
+        <Form.Label>Cardholder Name</Form.Label>
+        <Form.Control
+          type="text"
+          name="cardHolder"
+          placeholder="Cardholder Name"
+          value={cardFormData.cardHolder}
+          onChange={handleCardFormChange}
+          required
+        />
+      </Form.Group>
+    </Modal.Body>
+    <Modal.Footer>
+      <Button variant="secondary" onClick={() => setShowAddCardModal(false)}>
+        Cancel
+      </Button>
+      <Button variant="primary" type="submit">
+        Add Card
+      </Button>
+    </Modal.Footer>
+  </Form>
+</Modal>
+
+      <ToastifyContainer position="top-right" autoClose={5000} />
+    </Container>
+  );
+};
+
+export default AccountsPage;
+
+// Bank options and card types are now fetched from the database

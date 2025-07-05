@@ -1,0 +1,274 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "email": "user1@example.com",
+      "password": "password123",
+      "name": "Nidisha",
+      "profileImage": "https://randomuser.me/api/portraits/women/44.jpg"
+    }
+  ],
+  "accounts": [
+    {
+      "id": "acc-1",
+      "userId": 1,
+      "bankName": "HDFC Bank",
+      "accountNumber": "1234567890",
+      "accountType": "Savings",
+      "holderName": "Nidisha",
+      "ifsc": "HDFC0001234",
+      "balance": 250000,
+      "openingDate": "2020-01-15",
+      "branch": "Mumbai Main",
+      "createdAt": "2020-01-15T00:00:00.000Z",
+      "updatedAt": "2025-06-20T00:00:00.000Z"
+    },
+    {
+      "id": "acc-2",
+      "userId": 1,
+      "bankName": "ICICI Bank",
+      "accountNumber": "9876543210",
+      "accountType": "Current",
+      "holderName": "Nidisha",
+      "ifsc": "ICIC0009876",
+      "balance": 150000,
+      "openingDate": "2021-03-22",
+      "branch": "Pune",
+      "createdAt": "2021-03-22T00:00:00.000Z",
+      "updatedAt": "2025-06-20T00:00:00.000Z"
+    },
+    {
+      "id": "e995",
+      "userId": 1,
+      "bankName": "SBI",
+      "accountNumber": "1122334455",
+      "accountType": "Savings",
+      "holderName": "Nidisha",
+      "ifsc": "SBIN0001234",
+      "balance": 50000,
+      "openingDate": "2025-01-01",
+      "branch": "Delhi"
+    },
+    {
+      "id": "cbfa",
+      "userId": "1",
+      "bankName": "Kotak Mahindra Bank",
+      "accountNumber": "778894585497854",
+      "accountType": "salary",
+      "holderName": "Nidisha",
+      "ifsc": "KOTAK11234",
+      "branch": "dighi",
+      "openingDate": "2025-06-20",
+      "balance": 9000,
+      "cards": [],
+      "createdAt": "2025-06-20T09:01:05.560Z",
+      "updatedAt": "2025-06-20T09:01:05.560Z"
+    }
+  ],
+  "cards": [
+    {
+      "id": "card-1",
+      "userId": 1,
+      "bankAccountNumber": "1234567890",
+      "type": "Visa",
+      "number": "4111111111111111",
+      "expiry": "12/26",
+      "cvv": "123",
+      "holder": "Nidisha",
+      "status": "active",
+      "bg": "#4e73df",
+      "createdAt": "2025-01-15T00:00:00.000Z",
+      "updatedAt": "2025-06-20T00:00:00.000Z"
+    },
+    {
+      "id": "card-2",
+      "userId": 1,
+      "bankAccountNumber": "9876543210",
+      "type": "Mastercard",
+      "number": "5555555555554444",
+      "expiry": "06/27",
+      "cvv": "456",
+      "holder": "Nidisha",
+      "status": "active",
+      "bg": "#1cc88a",
+      "createdAt": "2025-03-22T00:00:00.000Z",
+      "updatedAt": "2025-06-20T00:00:00.000Z"
+    },
+    {
+      "id": "089d",
+      "userId": 1,
+      "bankAccountNumber": "1122334455",
+      "type": "Visa",
+      "number": "4111111111111112",
+      "expiry": "12/27",
+      "cvv": "123",
+      "holder": "Nidisha",
+      "status": "active"
+    },
+    {
+      "id": "b23a",
+      "userId": "1",
+      "bankAccountNumber": "1122334455",
+      "type": "Visa",
+      "number": "4544 5453 4343 4343",
+      "expiry": "09/35",
+      "cvv": "807",
+      "holder": "Nidisha Ghawade",
+      "status": "active",
+      "bg": "#6f42c1",
+      "createdAt": "2025-06-20T08:19:54.047Z",
+      "updatedAt": "2025-06-20T08:19:54.047Z"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "1",
+      "userId": 1,
+      "date": "2025-06-15T10:30:00",
+      "description": "Grocery Store",
+      "category": "Groceries",
+      "amount": 4520,
+      "type": "expense",
+      "status": "completed"
+    },
+    {
+      "id": "2",
+      "userId": 1,
+      "date": "2025-06-15T08:15:00",
+      "description": "Coffee Shop",
+      "category": "Food & Drink",
+      "amount": 350,
+      "type": "expense",
+      "status": "completed"
+    },
+    {
+      "id": "3",
+      "userId": 1,
+      "date": "2025-06-14T19:30:00",
+      "description": "Movie Tickets",
+      "category": "Entertainment",
+      "amount": 1200,
+      "type": "expense",
+      "status": "completed"
+    },
+    {
+      "id": "4",
+      "userId": 1,
+      "date": "2025-06-14T12:45:00",
+      "description": "Lunch with Team",
+      "category": "Food & Dining",
+      "amount": 850,
+      "type": "expense",
+      "status": "completed"
+    },
+    {
+      "id": "5",
+      "userId": 1,
+      "date": "2025-06-14T09:00:00",
+      "description": "Monthly Salary",
+      "category": "Salary",
+      "amount": 85000,
+      "type": "income",
+      "status": "completed"
+    },
+    {
+      "id": "6",
+      "userId": 1,
+      "date": "2025-06-13T15:30:00",
+      "description": "App Development",
+      "category": "Freelance",
+      "amount": 22000,
+      "type": "income",
+      "status": "completed"
+    },
+    {
+      "id": "7",
+      "userId": 1,
+      "date": "2025-06-11T14:30:00",
+      "description": "Online Workshop",
+      "category": "Education",
+      "amount": 12500,
+      "type": "income",
+      "status": "completed"
+    }
+  ],
+  "bankOptions": [
+    {
+      "id": "hdfc",
+      "name": "HDFC Bank",
+      "icon": "fa-university"
+    },
+    {
+      "id": "icici",
+      "name": "ICICI Bank",
+      "icon": "fa-building"
+    },
+    {
+      "id": "sbi",
+      "name": "State Bank of India",
+      "icon": "fa-landmark"
+    },
+    {
+      "id": "axis",
+      "name": "Axis Bank",
+      "icon": "fa-piggy-bank"
+    },
+    {
+      "id": "pnb",
+      "name": "Punjab National Bank",
+      "icon": "fa-credit-card"
+    },
+    {
+      "id": "kotak",
+      "name": "Kotak Mahindra Bank",
+      "icon": "fa-bank"
+    },
+    {
+      "id": "yes",
+      "name": "Yes Bank",
+      "icon": "fa-building-columns"
+    },
+    {
+      "id": "indusind",
+      "name": "IndusInd Bank",
+      "icon": "fa-building-columns"
+    },
+    {
+      "id": "idfc",
+      "name": "IDFC First Bank",
+      "icon": "fa-building-columns"
+    },
+    {
+      "id": "bob",
+      "name": "Bank of Baroda",
+      "icon": "fa-building-columns"
+    }
+  ],
+  "cardTypes": [
+    {
+      "id": "visa",
+      "name": "Visa",
+      "icon": "fa-cc-visa"
+    },
+    {
+      "id": "mastercard",
+      "name": "Mastercard",
+      "icon": "fa-cc-mastercard"
+    },
+    {
+      "id": "amex",
+      "name": "American Express",
+      "icon": "fa-cc-amex"
+    },
+    {
+      "id": "discover",
+      "name": "Discover",
+      "icon": "fa-cc-discover"
+    },
+    {
+      "id": "rupay",
+      "name": "RuPay",
+      "icon": "fa-credit-card"
+    }
+  ]
+}

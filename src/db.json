@@ -1,142 +1,674 @@
 {
   "users": [
     {
-      "id": 1,
+      "id": "1",
       "email": "user1@example.com",
-      "password": "password123",
+      "password": "1",
       "name": "Nidisha",
-      "profileImage": "https://randomuser.me/api/portraits/women/44.jpg",
-      "accounts": [
-        {
-          "id": 1,
-          "bank": "BankDash Platinum",
-          "number": "**** **** **** 1234",
-          "holder": "Nidisha",
-          "expiry": "12/27",
-          "balance": 75000,
-          "type": "Visa",
-          "bg": "#4e73df"
-        },
-        {
-          "id": 2,
-          "bank": "BankDash Gold",
-          "number": "**** **** **** 5678",
-          "holder": "Nidisha",
-          "expiry": "11/26",
-          "balance": 32500,
-          "type": "Mastercard",
-          "bg": "#f39c12"
-        }
-      ],
-      "transactions": [
-        {
-          "id": 1,
-          "date": "2025-06-10",
-          "description": "Grocery Store",
-          "category": "Shopping",
-          "amount": -156.78,
-          "type": "debit"
-        },
-        {
-          "id": 2,
-          "date": "2025-06-09",
-          "description": "Salary Deposit",
-          "category": "Income",
-          "amount": 5000.00,
-          "type": "credit"
-        },
-        {
-          "id": 3,
-          "date": "2025-06-08",
-          "description": "Electric Bill",
-          "category": "Utilities",
-          "amount": -89.50,
-          "type": "debit"
-        },
-        {
-          "id": 4,
-          "date": "2025-06-07",
-          "description": "Restaurant",
-          "category": "Food & Dining",
-          "amount": -65.20,
-          "type": "debit"
-        },
-        {
-          "id": 5,
-          "date": "2025-06-06",
-          "description": "Online Shopping",
-          "category": "Shopping",
-          "amount": -245.99,
-          "type": "debit"
-        }
-      ],
-      "investments": [
-        {
-          "id": 1,
-          "name": "Stocks",
-          "value": 25000,
-          "change": 5.2,
-          "changeType": "up"
-        },
-        {
-          "id": 2,
-          "name": "Mutual Funds",
-          "value": 18000,
-          "change": -1.8,
-          "changeType": "down"
-        },
-        {
-          "id": 3,
-          "name": "Fixed Deposits",
-          "value": 32000,
-          "change": 0.5,
-          "changeType": "up"
-        }
-      ],
-      "quickTransfer": [
-        {
-          "id": 1,
-          "name": "Alex Johnson",
-          "avatar": "https://randomuser.me/api/portraits/men/32.jpg"
-        },
-        {
-          "id": 2,
-          "name": "Sarah Wilson",
-          "avatar": "https://randomuser.me/api/portraits/women/44.jpg"
-        },
-        {
-          "id": 3,
-          "name": "Mike Brown",
-          "avatar": "https://randomuser.me/api/portraits/men/75.jpg"
-        },
-        {
-          "id": 4,
-          "name": "Emily Davis",
-          "avatar": "https://randomuser.me/api/portraits/women/22.jpg"
-        }
-      ]
+      "profileImage": "https://randomuser.me/api/portraits/women/44.jpg"
     },
     {
-      "id": 2,
+      "id": "2",
       "email": "user2@example.com",
       "password": "password123",
-      "name": "Another User",
-      "accounts": [
-        {
-          "id": 1,
-          "bank": "BankDash Silver",
-          "number": "**** **** **** 9012",
-          "holder": "Another User",
-          "expiry": "10/25",
-          "balance": 50000,
-          "type": "Visa",
-          "bg": "#1cc88a"
-        }
-      ],
-      "transactions": [
-        { "id": 1, "date": "2025-06-02", "desc": "Supermarket", "amount": -3500, "type": "expense" },
-        { "id": 2, "date": "2025-05-31", "desc": "Freelance Payment", "amount": 35000, "type": "income" }
-      ]
+      "name": "Test User",
+      "profileImage": "https://randomuser.me/api/portraits/men/32.jpg"
+    }
+  ],
+  "accounts": [
+    {
+      "id": "1",
+      "userId": "1",
+      "accountNumber": "1234567890",
+      "accountType": "Savings",
+      "balance": 24940,
+      "currency": "INR",
+      "bankName": "State Bank of India",
+      "branch": "Mumbai Main",
+      "ifsc": "SBIN0001234",
+      "isActive": true,
+      "createdAt": "2023-01-15T10:30:00Z",
+      "updatedAt": "2025-07-02T00:42:47.278Z"
+    },
+    {
+      "id": "2",
+      "userId": "1",
+      "accountNumber": "9876543210",
+      "accountType": "Current",
+      "balance": -8100,
+      "currency": "INR",
+      "bankName": "HDFC Bank",
+      "branch": "Andheri East",
+      "ifsc": "HDFC0001234",
+      "isActive": true,
+      "createdAt": "2023-02-20T14:45:00Z",
+      "updatedAt": "2025-07-02T01:35:25.447Z"
+    }
+  ],
+  "summaryCards": [
+    {
+      "id": "1",
+      "userId": 1,
+      "title": "Total Balance",
+      "value": "$45,231.00",
+      "change": "+2.5%",
+      "icon": "wallet",
+      "bg": "bg-warning bg-opacity-10",
+      "textClass": "text-warning"
+    },
+    {
+      "id": "2",
+      "userId": 1,
+      "title": "Bank Accounts",
+      "value": "2",
+      "change": "+1",
+      "icon": "university",
+      "bg": "bg-success bg-opacity-10",
+      "textClass": "text-success"
+    },
+    {
+      "id": "3",
+      "userId": 1,
+      "title": "Active Cards",
+      "value": "2",
+      "change": "0%",
+      "icon": "credit-card",
+      "bg": "bg-primary bg-opacity-10",
+      "textClass": "text-primary"
+    },
+    {
+      "id": "4",
+      "userId": 1,
+      "title": "Card Types",
+      "value": "2",
+      "change": "+1",
+      "icon": "piggy-bank",
+      "bg": "bg-info bg-opacity-10",
+      "textClass": "text-info"
+    }
+  ],
+  "cards": [
+    {
+      "id": "card1",
+      "userId": 1,
+      "accountId": 1,
+      "cardNumber": "4111111111111111",
+      "cardType": "debit",
+      "cardNetwork": "VISA",
+      "cardHolder": "NIDISHA",
+      "expiryDate": "06/27",
+      "cvv": "123",
+      "isActive": true,
+      "isCreditCard": false,
+      "isVirtual": false,
+      "spendingLimit": 50000,
+      "availableBalance": 50000,
+      "cardColor": "#4e73df",
+      "billingAddress": "123 Main St, Mumbai, India",
+      "createdAt": "2023-01-20T10:30:00Z"
+    },
+    {
+      "id": "card2",
+      "accountId": "2",
+      "cardNumber": "**** **** **** 5678",
+      "cardType": "debit",
+      "cardNetwork": "Mastercard",
+      "cardHolder": "NIDISHA GHAWADE",
+      "expiryDate": "12/26",
+      "cvv": "***",
+      "isActive": true,
+      "isCreditCard": false,
+      "isVirtual": true,
+      "dailyLimit": 100000,
+      "monthlyLimit": 500000,
+      "availableBalance": 146800,
+      "cardColor": "#1cc88a",
+      "billingAddress": "123 Main St, Mumbai, India",
+      "issueDate": "2022-05-22",
+      "updatedAt": "2025-07-02T01:35:25.447Z"
+    },
+    {
+      "id": "card3",
+      "accountId": "bank2",
+      "cardNumber": "**** **** **** 9012",
+      "cardType": "credit",
+      "cardNetwork": "VISA",
+      "cardHolder": "NIDISHA",
+      "expiryDate": "09/28",
+      "cvv": "***",
+      "isActive": true,
+      "isCreditCard": true,
+      "isVirtual": false,
+      "dailyLimit": 150000,
+      "monthlyLimit": 750000,
+      "cardColor": "#ff6b6b",
+      "billingAddress": "123 Main St, Mumbai, India",
+      "issueDate": "2024-01-10",
+      "creditLimit": 500000,
+      "availableCredit": 375000,
+      "minimumDue": 5000,
+      "paymentDueDate": "2025-07-10",
+      "rewardsPoints": 1250,
+      "cardName": "HDFC Regalia"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "txn-1750910365967",
+      "accountId": "1",
+      "userId": "1",
+      "type": "debit",
+      "toAccount": "9876543210",
+      "amount": 100,
+      "description": "Fund Transfer WITHIN_BANK",
+      "category": "transfer_out",
+      "status": "completed",
+      "transferType": "within_bank",
+      "reference": "TRF-1750910365967",
+      "date": "2025-06-26T03:59:25.967Z",
+      "createdAt": "2025-06-26T03:59:25.967Z",
+      "updatedAt": "2025-06-26T03:59:25.967Z"
+    },
+    {
+      "id": "txn-1750910366134",
+      "accountId": "2",
+      "userId": "1",
+      "fromAccount": "1",
+      "amount": 100,
+      "type": "credit",
+      "description": "Received: Fund Transfer WITHIN_BANK",
+      "category": "transfer_in",
+      "status": "completed",
+      "transferType": "within_bank",
+      "reference": "TRF-1750910365967",
+      "date": "2025-06-26T03:59:26.134Z",
+      "createdAt": "2025-06-26T03:59:26.134Z",
+      "updatedAt": "2025-06-26T03:59:26.134Z"
+    },
+    {
+      "id": "txn-1750910971734",
+      "accountId": 1,
+      "userId": "1",
+      "type": "debit",
+      "amount": 872,
+      "date": "2025-06-26",
+      "description": "Electricity Bill Payment",
+      "category": "bills",
+      "status": "completed",
+      "referenceId": "BILL-ELEC57906020",
+      "metadata": {
+        "paymentSource": "account",
+        "billType": "electricity",
+        "billNumber": "ELEC57906020"
+      }
+    },
+    {
+      "id": "txn-1751337536514",
+      "accountId": 1,
+      "userId": "1",
+      "type": "debit",
+      "amount": 1000,
+      "date": "2025-07-01",
+      "description": "Mobile Bill Payment",
+      "category": "bills",
+      "status": "completed",
+      "referenceId": "BILL-9878676768",
+      "metadata": {
+        "paymentSource": "account",
+        "billType": "mobile",
+        "billNumber": "9878676768"
+      }
+    },
+    {
+      "id": "txn-1751337902033",
+      "userId": "1",
+      "amount": 500,
+      "date": "2025-07-01T02:45:02.033Z",
+      "category": "transfer_out",
+      "status": "completed",
+      "createdAt": "2025-07-01T02:45:02.033Z",
+      "updatedAt": "2025-07-01T02:45:02.033Z"
+    },
+    {
+      "id": "txn-1751338749382",
+      "userId": "1",
+      "amount": 500,
+      "date": "2025-07-01T02:59:09.382Z",
+      "category": "transfer_out",
+      "status": "completed",
+      "createdAt": "2025-07-01T02:59:09.382Z",
+      "updatedAt": "2025-07-01T02:59:09.382Z"
+    },
+    {
+      "id": "txn-1751338749450",
+      "userId": "1",
+      "amount": 500,
+      "date": "2025-07-01T02:59:09.450Z",
+      "category": "transfer_in",
+      "status": "completed",
+      "createdAt": "2025-07-01T02:59:09.450Z",
+      "updatedAt": "2025-07-01T02:59:09.450Z"
+    },
+    {
+      "id": "f09f",
+      "accountId": "2",
+      "amount": 500,
+      "type": "credit",
+      "description": "Account credit via transfer",
+      "category": "transfer_in",
+      "status": "completed",
+      "reference": "TRF-1751338749382",
+      "date": "2025-07-01T02:59:09.497Z"
+    },
+    {
+      "id": "txn-1751339131683",
+      "userId": "1",
+      "amount": 100,
+      "date": "2025-07-01T03:05:31.683Z",
+      "category": "transfer_out",
+      "status": "completed",
+      "createdAt": "2025-07-01T03:05:31.683Z",
+      "updatedAt": "2025-07-01T03:05:31.683Z"
+    },
+    {
+      "id": "d1cb",
+      "accountId": "1",
+      "amount": 100,
+      "type": "debit",
+      "description": "Account debit via transfer",
+      "category": "transfer_out",
+      "status": "completed",
+      "reference": "TRF-1751339131683",
+      "date": "2025-07-01T03:05:31.766Z"
+    },
+    {
+      "id": "txn-1751416967278",
+      "accountId": 1,
+      "userId": "1",
+      "type": "debit",
+      "amount": 860,
+      "date": "2025-07-02",
+      "description": "Gas Bill Payment",
+      "category": "bills",
+      "status": "completed",
+      "referenceId": "BILL-GAS74582260",
+      "metadata": {
+        "paymentSource": "card",
+        "cardId": "card1",
+        "billType": "gas",
+        "billNumber": "GAS74582260"
+      }
+    },
+    {
+      "id": "txn-1751418818197",
+      "accountId": "2",
+      "userId": "1",
+      "type": "debit",
+      "amount": 6000,
+      "date": "2025-07-02",
+      "description": "internet Bill Payment (Card: ****)",
+      "category": "bills",
+      "status": "completed",
+      "referenceId": "BILL-NET69055922",
+      "metadata": {
+        "paymentSource": "card",
+        "cardId": "card2",
+        "billerName": "Internet Biller",
+        "billType": "internet",
+        "billNumber": "NET69055922"
+      }
+    },
+    {
+      "id": "txn-1751420125447",
+      "accountId": "2",
+      "userId": "1",
+      "type": "debit",
+      "amount": 3200,
+      "date": "2025-07-02",
+      "description": "water Bill Payment (Card: ****)",
+      "category": "bills",
+      "status": "completed",
+      "referenceId": "BILL-WTR77180473",
+      "metadata": {
+        "paymentSource": "card",
+        "cardId": "card2",
+        "billerName": "Water Biller",
+        "billType": "water",
+        "billNumber": "WTR77180473"
+      }
+    }
+  ],
+  "investments": [
+    {
+      "id": "2",
+      "userId": 1,
+      "name": "Mutual Funds",
+      "amount": 75000,
+      "currentValue": 81150,
+      "return": 8.2,
+      "icon": "chart-pie",
+      "color": "#1cc88a"
+    },
+    {
+      "id": "4",
+      "userId": 1,
+      "name": "Gold",
+      "amount": 35000,
+      "currentValue": 37030,
+      "return": 5.8,
+      "icon": "gem",
+      "color": "#f6c23e"
+    },
+    {
+      "id": "6",
+      "userId": 1,
+      "name": "Crypto",
+      "amount": 25000,
+      "currentValue": 31375,
+      "return": 25.5,
+      "icon": "bitcoin",
+      "color": "#6f42c1"
+    },
+    {
+      "id": "b197",
+      "name": "kpi green energy",
+      "type": "stocks",
+      "amount": 6000,
+      "currentValue": 65000,
+      "notes": "This is sock adding in to investment ",
+      "userId": 1,
+      "return": 983.3333333333334,
+      "icon": {
+        "key": null,
+        "props": {
+          "size": 20
+        },
+        "_owner": null,
+        "_store": {}
+      },
+      "color": "#4e73df",
+      "updatedAt": "2025-07-02T02:10:43.383Z",
+      "createdAt": "2025-07-02T01:54:05.825Z"
+    },
+    {
+      "id": "8c12",
+      "name": "500",
+      "type": "mutual_funds",
+      "amount": 5000,
+      "currentValue": 5000,
+      "notes": "",
+      "userId": 1,
+      "return": 0,
+      "icon": {
+        "key": null,
+        "props": {
+          "size": 20
+        },
+        "_owner": null,
+        "_store": {}
+      },
+      "color": "#1cc88a",
+      "createdAt": "2025-07-02T02:01:07.112Z"
+    },
+    {
+      "id": "9d77",
+      "name": "FD",
+      "type": "fixed_deposit",
+      "amount": 1111,
+      "currentValue": 1111,
+      "notes": "",
+      "userId": 1,
+      "return": 0,
+      "icon": {
+        "key": null,
+        "props": {
+          "size": 20
+        },
+        "_owner": null,
+        "_store": {}
+      },
+      "color": "#36b9cc",
+      "createdAt": "2025-07-02T02:01:36.398Z"
+    },
+    {
+      "id": "8ad6",
+      "name": "Real Estate",
+      "type": "real_estate",
+      "amount": 300,
+      "currentValue": 300,
+      "notes": "",
+      "userId": 1,
+      "return": 0,
+      "icon": {
+        "key": null,
+        "props": {
+          "size": 20
+        },
+        "_owner": null,
+        "_store": {}
+      },
+      "color": "#e74a3b",
+      "createdAt": "2025-07-02T02:01:53.546Z"
+    },
+    {
+      "id": "9f1f",
+      "name": "crypto",
+      "type": "crypto",
+      "amount": 1,
+      "currentValue": 1,
+      "notes": "",
+      "userId": 1,
+      "return": 0,
+      "icon": {
+        "key": null,
+        "props": {
+          "size": 20
+        },
+        "_owner": null,
+        "_store": {}
+      },
+      "color": "#6f42c1",
+      "createdAt": "2025-07-02T02:02:08.450Z"
+    },
+    {
+      "id": "9d59",
+      "name": "other",
+      "type": "other",
+      "amount": 400,
+      "currentValue": 450,
+      "notes": "",
+      "userId": 1,
+      "return": 12.5,
+      "icon": {
+        "key": null,
+        "props": {
+          "size": 20
+        },
+        "_owner": null,
+        "_store": {}
+      },
+      "color": "#858796",
+      "updatedAt": "2025-07-02T02:09:01.608Z",
+      "createdAt": "2025-07-02T02:02:25.870Z"
+    }
+  ],
+  "incomeTransactions": [
+    {
+      "id": "1001",
+      "userId": 1,
+      "accountId": 1,
+      "date": "2025-06-17T14:30:00",
+      "description": "Freelance Web Design",
+      "category": "Freelance",
+      "amount": 1250.75,
+      "type": "income",
+      "status": "completed",
+      "icon": "code",
+      "iconColor": "#10b759"
+    },
+    {
+      "id": "1002",
+      "userId": 1,
+      "accountId": 1,
+      "date": "2025-06-15T09:15:00",
+      "description": "Monthly Salary",
+      "category": "Salary",
+      "amount": 4500,
+      "type": "income",
+      "status": "completed",
+      "icon": "dollar-sign",
+      "iconColor": "#10b759"
+    }
+  ],
+  "bankOptions": [
+    {
+      "id": "hdfc",
+      "name": "HDFC Bank",
+      "icon": "fa-university"
+    },
+    {
+      "id": "icici",
+      "name": "ICICI Bank",
+      "icon": "fa-building"
+    },
+    {
+      "id": "sbi",
+      "name": "State Bank of India",
+      "icon": "fa-landmark"
+    },
+    {
+      "id": "axis",
+      "name": "Axis Bank",
+      "icon": "fa-piggy-bank"
+    },
+    {
+      "id": "kotak",
+      "name": "Kotak Mahindra Bank",
+      "icon": "fa-building-columns"
+    }
+  ],
+  "cardTypes": [
+    {
+      "id": "visa",
+      "name": "Visa",
+      "icon": "fa-cc-visa"
+    },
+    {
+      "id": "mastercard",
+      "name": "Mastercard",
+      "icon": "fa-cc-mastercard"
+    },
+    {
+      "id": "rupay",
+      "name": "RuPay",
+      "icon": "fa-credit-card"
+    },
+    {
+      "id": "amex",
+      "name": "American Express",
+      "icon": "fa-cc-amex"
+    }
+  ],
+  "billPayments": [
+    {
+      "id": "bill-1750583439548",
+      "userId": "1",
+      "accountId": 1,
+      "transactionId": "txn-1750583439548",
+      "billType": "mobile",
+      "billNumber": "9673959589",
+      "amount": 1234,
+      "paymentDate": "2025-06-22T09:10:39.548Z",
+      "status": "completed",
+      "referenceNumber": "BILL-9673959589",
+      "paymentSource": "card",
+      "cardId": "card1"
+    },
+    {
+      "id": "bill-1750583569363",
+      "userId": "1",
+      "accountId": 1,
+      "transactionId": "txn-1750583569362",
+      "billType": "gas",
+      "billNumber": "GAS58480434",
+      "amount": 900,
+      "paymentDate": "2025-06-22T09:12:49.363Z",
+      "status": "completed",
+      "referenceNumber": "BILL-GAS58480434",
+      "paymentSource": "card",
+      "cardId": "card1"
+    },
+    {
+      "id": "bill-1750910971734",
+      "userId": "1",
+      "accountId": 1,
+      "transactionId": "txn-1750910971734",
+      "billType": "electricity",
+      "billNumber": "ELEC57906020",
+      "amount": 872,
+      "paymentDate": "2025-06-26T04:09:31.734Z",
+      "status": "completed",
+      "referenceNumber": "BILL-ELEC57906020",
+      "paymentSource": "account"
+    },
+    {
+      "id": "bill-1751337536514",
+      "userId": "1",
+      "accountId": 1,
+      "transactionId": "txn-1751337536514",
+      "billType": "mobile",
+      "billNumber": "9878676768",
+      "amount": 1000,
+      "paymentDate": "2025-07-01T02:38:56.514Z",
+      "status": "completed",
+      "referenceNumber": "BILL-9878676768",
+      "paymentSource": "account"
+    },
+    {
+      "id": "bill-1751416967278",
+      "userId": "1",
+      "accountId": 1,
+      "transactionId": "txn-1751416967278",
+      "billType": "gas",
+      "billNumber": "GAS74582260",
+      "amount": 860,
+      "paymentDate": "2025-07-02T00:42:47.278Z",
+      "status": "completed",
+      "referenceNumber": "BILL-GAS74582260",
+      "paymentSource": "card",
+      "cardId": "card1"
+    },
+    {
+      "id": "bill-1751418818197",
+      "userId": "1",
+      "accountId": "2",
+      "transactionId": "txn-1751418818197",
+      "billType": "internet",
+      "billNumber": "NET69055922",
+      "amount": 6000,
+      "paymentDate": "2025-07-02T01:13:38.197Z",
+      "status": "completed",
+      "referenceNumber": "BILL-NET69055922",
+      "paymentMethod": "card",
+      "cardId": "card2",
+      "paymentSource": "card",
+      "billerName": "Internet Biller"
+    },
+    {
+      "id": "bill-1751420125447",
+      "userId": "1",
+      "accountId": "2",
+      "transactionId": "txn-1751420125447",
+      "billType": "water",
+      "billNumber": "WTR77180473",
+      "amount": 3200,
+      "paymentDate": "2025-07-02T01:35:25.447Z",
+      "status": "completed",
+      "referenceNumber": "BILL-WTR77180473",
+      "paymentMethod": "card",
+      "cardId": "card2",
+      "paymentSource": "card",
+      "billerName": "Water Biller"
     }
   ]
 }

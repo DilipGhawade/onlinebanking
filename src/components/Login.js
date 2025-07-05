@@ -28,26 +28,46 @@ const Login = () => {
     }));
   };
 
-  const handleEmailLogin = (e) => {
+  const handleEmailLogin = async (e) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
-    // Call the authAPI.login method
-    const { success, user, error } = authAPI.login(formData.email, formData.password);
-    
-    if (success && user) {
-      // Dispatch login success with user data
-      dispatch(loginSuccess(user));
-      // Store user in localStorage for persistence
-      localStorage.setItem('user', JSON.stringify(user));
-      // Navigate to dashboard
-      navigate("/dashboard", { replace: true });
-    } else {
-      setError(error || "Invalid email or password");
+    try {
+      console.log('Attempting login with:', formData.email);
+      // Call the authAPI.login method
+      const response = await authAPI.login(formData.email, formData.password);
+      
+      if (response.success && response.user) {
+        console.log('Login successful, user:', response.user);
+        // Dispatch login success with user data
+        dispatch(loginSuccess(response.user));
+        // Store user in localStorage for persistence
+        localStorage.setItem('user', JSON.stringify(response.user));
+        // Store token if available
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+        }
+        // Navigate to dashboard
+        navigate("/dashboard", { replace: true });
+      } else {
+        console.log('Login failed:', response);
+        
+        // More specific error messages
+        if (response.error === 'No user found with this email') {
+          setError('No account found with this email address.');
+        } else if (response.error === 'Invalid password') {
+          setError('Incorrect password. Please try again.');
+        } else {
+          setError(response.error || 'Invalid email or password');
+        }
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError("An error occurred during login. Please try again later.");
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
 

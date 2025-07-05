@@ -1,43 +1,227 @@
 :root {
   --sidebar-width: 260px;
   --header-height: 60px;
+  --transition-speed: 0.3s;
+  --content-max-width: 1400px;
+  --content-padding: 1.5rem;
+  --sidebar-zindex: 1000;
+  --header-zindex: 900;
+  --overlay-zindex: 990;
+  --container-padding: 1.5rem;
+}
+
+/* Base Layout */
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f8f9fc;
+  position: relative;
+  overflow-x: hidden;
 }
 
 /* Sidebar */
-.sidebar-container {
+.sidebar-wrapper {
   position: fixed;
   top: 0;
-  left: 0; /* Ensures it starts from the edge */
+  left: 0;
   width: var(--sidebar-width);
   height: 100vh;
+  background: #fff;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: var(--sidebar-zindex);
+  transform: translateX(-100%);
+  transition: transform var(--transition-speed) ease;
   overflow-y: auto;
-  transition: transform 0.3s ease;
-  z-index: 1050; /* Higher than header and overlay */
-  background-color: white;
-  border-right: 1px solid #dee2e6;
-  transform: translateX(-100%); /* Hidden by default on mobile */
+  -webkit-overflow-scrolling: touch;
 }
 
-.sidebar-container.open {
-  transform: translateX(0); /* Slides in when open */
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+.sidebar-wrapper.open {
+  transform: translateX(0);
 }
 
-/* Sidebar overlay on mobile */
+/* Sidebar overlay */
 .sidebar-overlay {
   position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.3);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: var(--overlay-zindex);
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease; /* Added visibility transition */
-  z-index: 1040; /* Below sidebar, above other content */
+  transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
 }
 
 .sidebar-overlay.show {
   opacity: 1;
   visibility: visible;
 }
+
+/* Main content area */
+.main-content {
+  flex: 1;
+  min-height: 100vh;
+  width: 100%;
+  margin-left: 0;
+  transition: margin var(--transition-speed) ease;
+  background-color: #f8f9fc;
+  padding-top: var(--header-height);
+  position: relative;
+  z-index: 1;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Page content */
+.page-content {
+  width: 100%;
+  min-height: calc(100vh - var(--header-height));
+  background-color: #f8f9fc;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-container {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  width: 100%;
+  padding: var(--content-padding);
+  box-sizing: border-box;
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure all direct children of content-container take full width */
+.content-container > * {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+  .content-container {
+    padding: 1rem;
+    max-width: 100%;
+  }
+  
+  .main-content {
+    padding-top: 60px;
+  }
+}
+
+.page-content {
+  padding-bottom: 1rem;
+}
+
+@media (max-width: 575.98px) {
+  :root {
+    --content-padding: 0.75rem;
+  }
+  
+  .content-container {
+    padding: 0.75rem;
+  }
+}
+
+/* Header */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  transition: left var(--transition-speed) ease;
+}
+
+/* Mobile menu button */
+.menu-toggle {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-right: 1rem;
+  color: #333;
+}
+
+/* Content wrapper */
+.content-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 1rem 0;
+}
+
+/* Desktop styles */
+@media (min-width: 992px) {
+  .sidebar-wrapper {
+    transform: translateX(0);
+  }
+  
+  .main-content {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+  }
+  
+  .sidebar-overlay {
+    display: none;
+  }
+  
+  header {
+    left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+  }
+  
+  .page-content {
+    padding: 30px;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 991.98px) {
+  .d-lg-none {
+    display: block;
+  }
+  
+  .d-none-mobile {
+    display: none !important;
+  }
+}
+
+/* Utility classes */
+.d-none {
+  display: none !important;
+}
+
+.d-lg-none {
+  display: none;
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color var(--transition-speed) ease,
+              color var(--transition-speed) ease,
+              box-shadow var(--transition-speed) ease;
+}
+
+/* Mobile header */
 
 /* Mobile Header (from Dashboard.js) - visible only on mobile via d-md-none */
 .mobile-header-layout {
@@ -46,8 +230,8 @@
   left: 0;
   right: 0;
   height: var(--header-height);
-  z-index: 1035; /* Ensure it's above main content, potentially above .app-header if they could overlap, but below sidebar */
-  padding: 0.5rem 1rem; /* Consistent padding */
+  z-index: 1035;
+  padding: 0.5rem 1rem;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: flex;
@@ -55,32 +239,24 @@
   align-items: center;
 }
 
-/* App Header (from Header.js) - hidden on mobile, shown on desktop */
+/* App header */
 .app-header {
-  display: none; /* Hidden by default (mobile-first) */
+  display: none;
   position: fixed;
   top: 0;
   right: 0;
-  left: 0; /* Will be overridden for desktop */
+  left: 0;
   height: var(--header-height);
   z-index: 1030;
-  /* Bootstrap classes like bg-white, shadow-sm, px-4, d-flex are on the element for other styling */
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Main layout adjustments */
-.main-content {
-  padding-top: var(--header-height); /* This pushes the content down below the fixed header */
-  margin-left: 0; /* Default for mobile */
-  padding-bottom: 1rem;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-  min-height: 100vh;
-  background-color: #f8f9fa; /* Light background for the main content */
-}
-
+/* Dashboard layout */
 .dashboard {
   display: flex;
   min-height: 100vh;
+  flex-direction: column;
 }
 
 .dropdown-menu {
@@ -88,12 +264,44 @@
 }
 
 /* Responsive adjustments for larger screens (md and up) */
-@media (min-width: 768px) {
-  /* .mobile-header-layout is hidden on desktop by Bootstrap d-md-none */
+@media (min-width: 992px) {
+  .main-content {
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+  }
+  
+  .sidebar-wrapper {
+    transform: translateX(0);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .content-container {
+    padding: 2rem;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .mobile-header-layout {
+    display: none;
+  }
 
   .app-header {
-    display: flex; /* Show on desktop, use flex due to Bootstrap classes on the element */
-    left: var(--sidebar-width); /* Position header to the right of the sidebar */
+    display: flex;
+    left: 0;
+    width: 100%;
+  }
+  
+  .sidebar-wrapper {
+    z-index: var(--sidebar-zindex);
+  }
+  
+  .main-content {
+    width: 100%;
+    margin-left: 0;
+  }
+  
+  .content-container {
+    padding: 1.25rem;
   }
 
   .sidebar-container {

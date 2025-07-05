@@ -1,0 +1,76 @@
+/* Responsive Sidebar */
+.sidebar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 280px;
+  z-index: 1050;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.sidebar-wrapper.open {
+  transform: translateX(0);
+}
+
+@media (min-width: 992px) {
+  .sidebar-wrapper {
+    position: relative;
+    transform: translateX(0);
+    height: calc(100vh - 60px);
+    top: 0;
+    z-index: auto;
+    box-shadow: none;
+  }
+}
+
+/* Smooth transitions for theme changes */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Ensure content doesn't jump when scrollbar appears */
+html {
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+/* Responsive tables */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix for mobile viewport height */
+.min-vh-100 {
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+}
+
+/* Ensure images are responsive */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Better spacing for mobile */
+@media (max-width: 767.98px) {
+  .container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .p-4 {
+    padding: 1rem !important;
+  }
+}
+
+/* Fix for iOS zoom on input focus */
+@supports (-webkit-touch-callout: none) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
