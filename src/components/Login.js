@@ -6,6 +6,9 @@ import { Button, Form, Alert, Spinner } from "react-bootstrap";
 import { authAPI } from "../services/api";
 
 const Login = () => {
+  const carouselColor = {
+    color:'white'
+  }
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -73,51 +76,80 @@ const Login = () => {
 
 
   return (
-    <div className="container-fluid min-vh-100 d-flex align-items-center py-5">
-      <div className="row justify-content-center align-items-center g-4 w-100">
-        {/* Carousel Section */}
-        <div className="col-lg-6 d-none d-lg-block">
+    <div className="container-fluid min-vh-100 d-flex align-items-center py-3 py-lg-5 px-0 px-lg-3">
+      <div className="row justify-content-center align-items-center w-100 mx-0 g-4 g-lg-5">
+        {/* Carousel Section - Visible on all screens */}
+        <div className="col-12 col-lg-6 d-flex justify-content-center">
           <div
             id="loginCarousel"
-            className="carousel slide h-100"
+            className="carousel slide w-100"
             data-bs-ride="carousel"
-            style={{ height: '500px' }}
+            style={{
+              maxWidth: '600px',
+              height: 'auto',
+              aspectRatio: '16/9',
+              margin: '0 0 2rem 0',
+              borderRadius: '1rem',
+              overflow: 'hidden',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+            }}
           >
             <div className="carousel-inner h-100 rounded-4 overflow-hidden position-relative">
               <div className="carousel-item active h-100">
-                <img
-                  src="/images/slider/slide1.jpg"
-                  className="d-block w-100 h-100"
-                  alt="Banking"
-                  style={{ objectFit: 'cover' }}
-                />
-                <div className="carousel-caption">
-                  <h3>Banking Made Easy</h3>
-                  <p>Manage your finances with our secure platform</p>
+                <div className="position-relative w-100 h-100">
+                  <img
+                    src="/images/slider/slide1.jpg"
+                    className="d-block w-100 h-100"
+                    alt="Banking"
+                    style={{ 
+                      objectFit: 'cover',
+                      width: '100%',
+                      height: '100%',
+                      objectPosition: 'center center'
+                    }}
+                  />
+                  <div className="carousel-caption d-none d-md-block" style={{ color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                    <h3 className="h5 fw-bold">Banking Made Easy</h3>
+                    <p style={carouselColor} className="mb-0">Manage your finances with our secure platform</p>
+                  </div>
                 </div>
               </div>
               <div className="carousel-item h-100">
-                <img
-                  src="/images/slider/slide2.jpg"
-                  className="d-block w-100 h-100"
-                  alt="Finance"
-                  style={{ objectFit: 'cover' }}
-                />
-                <div className="carousel-caption">
-                  <h3>Track Your Expenses</h3>
-                  <p>Stay on top of your spending with our intuitive tools</p>
+                <div className="position-relative w-100 h-100">
+                  <img
+                    src="/images/slider/slide2.jpg"
+                    className="d-block w-100 h-100"
+                    alt="Finance"
+                    style={{ 
+                      objectFit: 'cover',
+                      width: '100%',
+                      height: '100%',
+                      objectPosition: 'center center'
+                    }}
+                  />
+                  <div className="carousel-caption d-none d-md-block" style={{ color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                    <h3 className="h5 fw-bold">Track Your Expenses</h3>
+                    <p style={carouselColor} className="mb-0">Stay on top of your spending with our intuitive tools</p>
+                  </div>
                 </div>
               </div>
               <div className="carousel-item h-100">
-                <img
-                  src="/images/slider/slide3.jpg"
-                  className="d-block w-100 h-100"
-                  alt="Money"
-                  style={{ objectFit: 'cover' }}
-                />
-                <div className="carousel-caption">
-                  <h3>Secure Transactions</h3>
-                  <p>Your security is our top priority</p>
+                <div className="position-relative w-100 h-100">
+                  <img
+                    src="/images/slider/slide3.jpg"
+                    className="d-block w-100 h-100"
+                    alt="Money"
+                    style={{ 
+                      objectFit: 'cover',
+                      width: '100%',
+                      height: '100%',
+                      objectPosition: 'center center'
+                    }}
+                  />
+                  <div className="carousel-caption d-none d-md-block" style={{ color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+                    <h3 className="h5 fw-bold">Secure Transactions</h3>
+                    <p style={carouselColor} className="mb-0">Your security is our top priority</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -149,9 +181,9 @@ const Login = () => {
         </div>
 
         {/* Login Form Section */}
-        <div className="col-lg-4 col-md-8">
-          <div className="card shadow border-0 rounded-4 overflow-hidden">
-            <div className="card-body p-4 p-md-5">
+        <div className="col-12 col-sm-10 col-md-8 col-lg-5 col-xxl-4">
+          <div className="card shadow border-0 rounded-4 overflow-hidden mx-auto" style={{ maxWidth: '450px' }}>
+            <div className="card-body p-4 p-sm-5">
               <div className="text-center mb-4">
                 <h2 className="fw-bold mb-2">Welcome Back</h2>
                 <p className="text-muted mb-0">Sign in to access your account</p>
@@ -173,7 +205,7 @@ const Login = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="Enter your email"
-                    className="py-2"
+                    className="py-2 px-3"
                     required
                   />
                 </Form.Group>
@@ -192,16 +224,17 @@ const Login = () => {
                       value={formData.password}
                       onChange={handleInputChange}
                       placeholder="Enter your password"
-                      className="py-2"
+                      className="py-2 px-3"
                       required
                     />
                     <button
-                      className="btn btn-outline-secondary border-start-0 border"
+                      className="btn btn-outline-secondary border-start-0 border d-flex align-items-center justify-content-center"
                       type="button"
                       onClick={togglePasswordVisibility}
                       aria-label={showPassword ? "Hide password" : "Show password"}
+                      style={{ minWidth: '45px' }}
                     >
-                      <i className={`bi bi-eye${showPassword ? '-slash' : ''}`}></i>
+                      <i className={`bi bi-eye${showPassword ? '-slash' : ''} fs-5`}></i>
                     </button>
                   </div>
                 </Form.Group>

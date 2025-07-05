@@ -94,7 +94,7 @@ const Header = ({ onToggleSidebar, isSidebarOpen, user, activeMenu }) => {
             >
               {isSidebarOpen ? <HiOutlineX size={24} /> : <HiOutlineMenu size={24} />}
             </button>
-            <h1 className="page-title mb-0 fs-5 fw-bold d-none d-md-block">
+            <h1 className="page-title mb-0 fs-5 fw-bold">
               <Link to="/dashboard" className="text-decoration-none text-dark">
                 {activeMenu || 'Dashboard'}
               </Link>
