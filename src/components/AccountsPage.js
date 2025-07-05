@@ -261,7 +261,7 @@ const AccountsPage = () => {
       <ToastifyContainer position="top-right" autoClose={5000} />
       
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>My Accounts</h2>
+        {/* <h2>My Accounts</h2> */}
         <Button 
           variant="primary"
           onClick={() => setShowAddAccountModal(true)}

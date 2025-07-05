@@ -192,7 +192,7 @@ const CreditCardsPage = () => {
   return (
     <Container className="py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2><FaCreditCard className="me-2" /> My Credit Cards</h2>
+        {/* <h2><FaCreditCard className="me-2" /> My Credit Cards</h2> */}
         <Button variant="primary" onClick={() => setShowAddCard(true)}>
           <FaPlus className="me-2" /> Add Credit Card
         </Button>

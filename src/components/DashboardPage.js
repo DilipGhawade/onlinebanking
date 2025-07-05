@@ -550,10 +550,10 @@ const DashboardPage = () => {
   return (
     <div className="w-100">
       {/* Welcome Section */}
-      <div className="px-3 pt-3">
-        <h2 className="mb-0">Hello, {user.firstName || 'User'}</h2>
+      {/* <div className="px-3 pt-3">
+        <h2 className="mb-0">Hello, {user.name || 'User'}</h2>
         <p className="text-muted mb-0">Welcome back to your dashboard</p>
-      </div>
+      </div> */}
 
       {/* Render Modals */}
       {renderModals()}
