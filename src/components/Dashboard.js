@@ -6,8 +6,6 @@ import { menuItems } from '../constants/menuItems';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './Dashboard.css';
 
 // Import pages
@@ -44,6 +42,23 @@ function Dashboard() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 992);
   const [activeMenu, setActiveMenu] = useState('Dashboard');
+  
+  // Get the current route name based on path
+  const getActiveRouteName = useCallback((pathname) => {
+    const path = pathname.split('/').pop();
+    switch(path) {
+      case 'dashboard': return 'Dashboard';
+      case 'transactions': return 'Transactions';
+      case 'accounts': return 'Accounts';
+      case 'investments': return 'Investments';
+      case 'creditcards': return 'Credit Cards';
+      case 'loans': return 'Loans';
+      case 'settings': return 'Settings';
+      default: return 'Dashboard';
+    }
+  }, []);
+  
+  const activeRouteName = useMemo(() => getActiveRouteName(location.pathname), [location.pathname, getActiveRouteName]);
 
   // Handle logout
   const handleLogout = useCallback(() => {
@@ -247,6 +262,7 @@ function Dashboard() {
             onToggleSidebar={toggleSidebar} 
             isSidebarOpen={sidebarOpen}
             user={user}
+            activeMenu={activeRouteName}
           />
         </div>
         

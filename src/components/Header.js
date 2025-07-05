@@ -12,7 +12,7 @@ import {
   HiOutlineChevronDown
 } from 'react-icons/hi';
 
-const Header = ({ onToggleSidebar, isSidebarOpen, user }) => {
+const Header = ({ onToggleSidebar, isSidebarOpen, user, activeMenu }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -96,7 +96,7 @@ const Header = ({ onToggleSidebar, isSidebarOpen, user }) => {
             </button>
             <h1 className="page-title mb-0 fs-5 fw-bold d-none d-md-block">
               <Link to="/dashboard" className="text-decoration-none text-dark">
-                Online Banking
+                {activeMenu || 'Dashboard'}
               </Link>
             </h1>
           </div>
