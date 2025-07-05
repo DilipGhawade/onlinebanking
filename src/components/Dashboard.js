@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
 import { menuItems } from '../constants/menuItems';
 import Sidebar from './Sidebar';
 import Header from './Header';
-
 import './Dashboard.css';
 
 // Import pages
@@ -17,6 +16,7 @@ import LoansPage from './LoansPage';
 import SettingPage from './SettingPage';
 import ErrorBoundary from './ErrorBoundary';
 import InvestmentsPage from './InvestmentsPage';
+import ServicesPage from './ServicesPage';
 
 // Simple Loading Spinner Component
 const LoadingSpinner = () => (
@@ -40,121 +40,179 @@ function Dashboard() {
   
   // State declarations
   const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
-  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 992);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(!isMobile);
   const [activeMenu, setActiveMenu] = useState('Dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  // Get the current route name based on path
-  const getActiveRouteName = useCallback((pathname) => {
-    const path = pathname.split('/').pop();
-    switch(path) {
-      case 'dashboard': return 'Dashboard';
-      case 'transactions': return 'Transactions';
-      case 'accounts': return 'Accounts';
-      case 'investments': return 'Investments';
-      case 'creditcards': return 'Credit Cards';
-      case 'loans': return 'Loans';
-      case 'settings': return 'Settings';
-      default: return 'Dashboard';
+  // Update mobile state on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 992;
+      setIsMobile(mobile);
+      
+      // If switching to mobile, close the sidebar
+      if (mobile && isSidebarOpen) {
+        setIsSidebarOpen(false);
+      }
+      
+      // If switching to desktop, ensure sidebar is not stuck open
+      if (!mobile) {
+        setIsSidebarOpen(false);
+      }
+    };
+    
+    // Initial check
+    handleResize();
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isSidebarOpen]);
+  
+  // Toggle body class when mobile sidebar is open
+  useEffect(() => {
+    if (isMobile) {
+      if (isSidebarOpen) {
+        document.body.classList.add('sidebar-open');
+      } else {
+        document.body.classList.remove('sidebar-open');
+      }
     }
-  }, []);
+    
+    return () => {
+      document.body.classList.remove('sidebar-open');
+    };
+  }, [isMobile, isSidebarOpen]);
   
-  const activeRouteName = useMemo(() => getActiveRouteName(location.pathname), [location.pathname, getActiveRouteName]);
+  // Close sidebar on mobile when clicking outside or navigating
+  const closeSidebar = useCallback(() => {
+    if (isMobile) {
+      setIsSidebarOpen(false);
+      document.body.classList.remove('sidebar-open');
+    }
+  }, [isMobile]);
 
+  // Toggle sidebar open/closed state
+  const toggleSidebar = useCallback(() => {
+    console.log('Toggling sidebar', { isMobile, currentIsOpen: isSidebarOpen });
+    if (isMobile) {
+      const newState = !isSidebarOpen;
+      setIsSidebarOpen(newState);
+      if (newState) {
+        document.body.classList.add('sidebar-open');
+      } else {
+        document.body.classList.remove('sidebar-open');
+      }
+    } else {
+      setIsSidebarCollapsed(prev => !prev);
+    }
+  }, [isMobile, isSidebarOpen]);
+
+  const handleMouseEnter = useCallback(() => {
+    if (!isMobile && isSidebarCollapsed) {
+      setIsSidebarCollapsed(false);
+    }
+  }, [isMobile, isSidebarCollapsed]);
+  
+  const handleMouseLeave = useCallback(() => {
+    if (!isMobile && !isSidebarCollapsed) {
+      setIsSidebarCollapsed(true);
+    }
+  }, [isMobile, isSidebarCollapsed]);
+  
   // Handle logout
   const handleLogout = useCallback(() => {
     dispatch(logout());
     navigate('/login');
   }, [dispatch, navigate]);
 
-  // Toggle sidebar
-  const toggleSidebar = useCallback(() => {
-    setSidebarOpen(prev => {
-      const newState = !prev;
-      if (isMobile) {
-        if (newState) {
-          document.body.classList.add('sidebar-open');
-        } else {
-          document.body.classList.remove('sidebar-open');
-        }
-      }
-      return newState;
-    });
-  }, [isMobile]);
-
-  // Close sidebar
-  const closeSidebar = useCallback(() => {
-    setSidebarOpen(false);
-    document.body.classList.remove('sidebar-open');
+  // Get the current route name based on path
+  const getActiveRouteName = useCallback((pathname) => {
+    // Find the matching menu item from the menuItems array
+    const menuItem = menuItems.find(item => pathname.startsWith(item.path));
+    return menuItem ? menuItem.label : 'Dashboard';
   }, []);
-
-  // Handle window resize and set initial state
+  
+  // Set active menu based on current route
   useEffect(() => {
-    const handleResize = () => {
-      const isMobileView = window.innerWidth < 992;
-      const wasMobile = isMobile;
-      
-      if (isMobileView !== wasMobile) {
-        setIsMobile(isMobileView);
-        
-        if (isMobileView) {
-          // Switching to mobile view
-          document.body.classList.remove('sidebar-open');
-          setSidebarOpen(false);
-        } else {
-          // Switching to desktop view
-          document.body.classList.add('sidebar-open');
-          setSidebarOpen(true);
-        }
-      }
-    };
-
-    // Set initial state
-    handleResize();
-    
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      document.body.classList.remove('sidebar-open');
-    };
+    const routeName = getActiveRouteName(location.pathname);
+    console.log('Setting active menu:', { path: location.pathname, routeName });
+    setActiveMenu(routeName);
+  }, [location.pathname, getActiveRouteName]);
+  
+  // Handle menu item click
+  const handleMenuItemClick = useCallback((path) => {
+    navigate(path);
+    setActiveMenu(menuItems.find(item => item.path === path)?.label || 'Dashboard');
+    if (isMobile) {
+      setIsSidebarOpen(false);
+    }
   }, [isMobile]);
-
+  
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
     if (!isMobile) return;
     
     const handleClickOutside = (event) => {
       const sidebar = document.querySelector('.sidebar');
-      const menuButton = document.querySelector('.menu-toggle');
+      const headerToggle = document.querySelector('.header-toggle');
       
-      if (sidebarOpen && 
+      if (isSidebarOpen && 
           sidebar && 
-          menuButton &&
           !sidebar.contains(event.target) && 
-          !menuButton.contains(event.target)) {
+          !(headerToggle && headerToggle.contains(event.target))) {
         closeSidebar();
       }
     };
 
+    // Add both mousedown and touchstart for better mobile support
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, [isMobile, sidebarOpen, closeSidebar]);
-
-  // Update active menu based on route
-  useEffect(() => {
-    const currentPath = location.pathname;
-    const activeItem = menuItems.find(item => item.path === currentPath);
-    if (activeItem) {
-      setActiveMenu(activeItem.label);
-    }
-  }, [location.pathname]);
-
-  // Scroll to top on route change
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [location.pathname]);
+  }, [isMobile, closeSidebar, isSidebarOpen]);
   
+  // Close sidebar when route changes on mobile
+  useEffect(() => {
+    if (isMobile) {
+      closeSidebar();
+    }
+  }, [location.pathname, isMobile, closeSidebar]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 992;
+      const wasMobile = isMobile;
+      
+      if (mobile !== wasMobile) {
+        console.log(`Window resized. Mobile: ${mobile}, wasMobile: ${wasMobile}`);
+        setIsMobile(mobile);
+        
+        if (mobile) {
+          // Switching to mobile - close sidebar
+          console.log('Switching to mobile view - closing sidebar');
+          setIsSidebarOpen(false);
+        } else {
+          // Switching to desktop - ensure sidebar is in collapsed state
+          console.log('Switching to desktop view - collapsing sidebar');
+          setIsSidebarCollapsed(true);
+          setIsSidebarOpen(false);
+        }
+      }
+    };
+    
+    // Initial check
+    handleResize();
+    
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isMobile]);
+
   // Show loading state while checking authentication
   if (loading) {
     return <LoadingSpinner />;
@@ -162,113 +220,133 @@ function Dashboard() {
   
   // If no user is logged in, don't render the dashboard
   if (!user) {
-    return null; // Let the useEffect handle the redirect
+    return null; // The auth flow will handle the redirect
   }
+
+  // Sidebar style based on state
+  const sidebarStyle = {
+    width: isMobile ? '250px' : (isSidebarCollapsed ? '70px' : '250px'),
+    height: '100vh',
+    position: 'fixed',
+    top: 0,
+    left: isMobile ? (isSidebarOpen ? '0' : '-250px') : '0',
+    zIndex: 1002, // Higher than header to stay on top
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    backgroundColor: '#1e1e2d',
+    boxShadow: isMobile && isSidebarOpen ? '8px 0 15px 0 rgba(0,0,0,0.1)' : 'none',
+    overflowY: 'auto',
+    padding: '1rem 0',
+    color: '#9899ac',
+    display: 'block',
+    visibility: 'visible',
+    opacity: 1,
+    transform: 'translateX(0)',
+    overflowX: 'hidden' // Prevent horizontal scrollbar
+  };
   
-  // Add mobile styles
-  const mobileStyles = {
-    mainContent: {
-      marginLeft: '0',
-      width: '100%',
-      transition: 'margin-left 0.3s ease-in-out',
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column'
-    },
-    desktopMainContent: {
-      marginLeft: sidebarOpen ? '280px' : '0',
-      transition: 'margin-left 0.3s ease-in-out',
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column'
-    }
+  // Sidebar width
+  const sidebarWidth = isMobile ? '250px' : (isSidebarCollapsed ? '70px' : '250px');
+  
+  // Header style - positioned to the right of the sidebar
+  const headerStyle = {
+    position: 'fixed',
+    top: 0,
+    left: isMobile ? '0' : sidebarWidth,
+    right: 0,
+    height: '70px',
+    zIndex: 1001, // Below sidebar but above content
+    transition: isMobile ? 'none' : 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    backgroundColor: '#fff',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0 1.5rem',
+    margin: 0,
+    boxSizing: 'border-box',
+    overflow: 'hidden',
+    width: isMobile ? '100%' : `calc(100% - ${isSidebarCollapsed ? '70px' : '250px'})`,
+    marginLeft: '0' // Ensure no extra margin on the left
+  };
+  
+  // Main content style - positioned below header and to the right of sidebar
+  const mainContentStyle = {
+    position: 'absolute',
+    left: isMobile ? '0' : (isSidebarCollapsed ? '70px' : '250px'),
+    right: '0',
+    top: '70px',
+    bottom: '0',
+    padding: '1rem',
+    backgroundColor: '#f5f7fa',
+    transition: isMobile ? 'none' : 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    overflowX: 'hidden',
+    overflowY: 'auto',
+    boxSizing: 'border-box',
+    margin: 0
   };
 
   return (
-    <div className={`app-container ${sidebarOpen ? 'sidebar-open' : ''}`} style={{
-      position: 'relative',
+    <div className="app-container" style={{ 
       minHeight: '100vh',
-      overflowX: 'hidden'
+      position: 'relative',
+      width: '100%',
+      overflowX: 'hidden',
+      backgroundColor: '#f5f7fa',
+      display: 'flex',
+      flexDirection: 'column'
     }}>
-      {/* Mobile overlay */}
-      {isMobile && sidebarOpen && (
-        <div 
-          className="mobile-overlay"
-          onClick={closeSidebar}
-          aria-hidden="true"
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            zIndex: 999,
-            display: 'block'
-          }}
-        />
-      )}
-      
       {/* Sidebar */}
-      <div 
-        className={`sidebar ${sidebarOpen ? 'open' : ''}`}
-        style={{
-          width: '280px',
-          height: '100vh',
-          background: '#fff',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          zIndex: 1000,
-          boxShadow: '2px 0 10px rgba(0, 0, 0, 0.1)',
-          transition: 'transform 0.3s ease-in-out',
-          transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
-          overflowY: 'auto',
-          willChange: 'transform'
-        }}
+      <aside 
+        className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}
+        style={sidebarStyle}
+        onMouseEnter={!isMobile ? handleMouseEnter : undefined}
+        onMouseLeave={!isMobile ? handleMouseLeave : undefined}
       >
         <Sidebar 
-          isMobile={isMobile}
-          onClose={closeSidebar}
           onLogout={handleLogout}
+          onClose={closeSidebar}
+          isMobile={isMobile}
           activeMenu={activeMenu}
           setActiveMenu={setActiveMenu}
+          isCollapsed={isSidebarCollapsed}
+          setIsCollapsed={setIsSidebarCollapsed}
+          onMenuItemClick={handleMenuItemClick}
+        />
+      </aside>
+      
+      {/* Header - positioned to the right of sidebar */}
+      <div style={headerStyle}>
+        <Header 
+          user={user} 
+          activeMenu={activeMenu}
+          onLogout={handleLogout}
+          isMobile={isMobile}
+          isSidebarCollapsed={isSidebarCollapsed}
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={toggleSidebar}
         />
       </div>
       
       {/* Main content wrapper */}
-      <div 
-        style={{
-          position: 'fixed',
-          left: sidebarOpen ? '280px' : '0',
-          right: 0,
-          top: 0,
-          bottom: 0,
-          overflowY: 'auto',
-          transition: 'left 0.3s ease-in-out'
-        }}
-      >
-        {/* Sticky header */}
-        <div 
-          style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 1000,
-            background: 'white',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-          }}
-        >
-          <Header 
-            onToggleSidebar={toggleSidebar} 
-            isSidebarOpen={sidebarOpen}
-            user={user}
-            activeMenu={activeRouteName}
-          />
-        </div>
-        
-        {/* Main content */}
-        <div className="main-wrapper">
-          <main className="main-content">
+      <div style={{
+        ...mainContentStyle,
+        padding: '1.5rem',
+        paddingBottom: '20px',
+        minHeight: 'calc(100vh - 70px)'
+      }}>
+        {/* <div style={{
+          width: '100%',
+          height: '100%',
+          backgroundColor: '#fff',
+          borderRadius: '8px',
+          boxShadow: '0 0.125rem 0.25rem rgba(0, 0, 0, 0.075)'
+        }}> */}
+          {/* Page content */}
+          <div style={{
+            width: '100%',
+            maxWidth: '100%',
+            margin: 0,
+            padding: '1.5rem'
+          }}>
             <ErrorBoundary>
               <Routes>
                 <Route index element={<Navigate to="dashboard" replace />} />
@@ -291,12 +369,6 @@ function Dashboard() {
                   } 
                 />
                 <Route 
-                  path="investments" 
-                  element={
-                    <InvestmentsPage onNavigate={() => setActiveMenu('Investments')} />
-                  } 
-                />
-                <Route 
                   path="creditcards" 
                   element={
                     <CreditCardsPage onNavigate={() => setActiveMenu('Credit Cards')} />
@@ -309,20 +381,28 @@ function Dashboard() {
                   } 
                 />
                 <Route 
+                  path="services" 
+                  element={
+                    <ServicesPage onNavigate={() => setActiveMenu('Services')} />
+                  } 
+                />
+                <Route 
+                  path="investments" 
+                  element={
+                    <InvestmentsPage onNavigate={() => setActiveMenu('Investments')} />
+                  } 
+                />
+                <Route 
                   path="settings" 
                   element={
                     <SettingPage onNavigate={() => setActiveMenu('Settings')} />
                   } 
                 />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
               </Routes>
             </ErrorBoundary>
-          </main>
-        </div>
-      </div>
-      
-      {/* Toast Notifications */}
-      <div className="toast-container">
-        {/* Toast notifications will be added here */}
+          </div>
+        {/* </div> */}
       </div>
     </div>
   );

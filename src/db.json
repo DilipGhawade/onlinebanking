@@ -43,6 +43,22 @@
       "isActive": true,
       "createdAt": "2023-02-20T14:45:00Z",
       "updatedAt": "2025-07-02T01:35:25.447Z"
+    },
+    {
+      "id": "0b17",
+      "bankName": "Kotak bank",
+      "accountNumber": "890000000000",
+      "accountType": "salary",
+      "holderName": "Nidisha",
+      "ifsc": "KOTAK112345",
+      "branch": "Dighi Pune",
+      "openingDate": "2018-03-05",
+      "balance": 5000,
+      "currency": "INR",
+      "userId": "1",
+      "status": "active",
+      "createdAt": "2025-07-05T04:59:48.608Z",
+      "updatedAt": "2025-07-05T04:59:48.608Z"
     }
   ],
   "summaryCards": [

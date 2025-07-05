@@ -572,6 +572,41 @@ const userAPI = {
 
 // Bank Accounts API methods
 export const accountsAPI = {
+  /**
+   * Add a new bank account
+   * @param {Object} accountData - The account data to add
+   * @param {string} accountData.userId - The ID of the user this account belongs to
+   * @param {string} accountData.accountType - Type of account (e.g., 'savings', 'checking')
+   * @param {string} accountData.accountNumber - The account number
+   * @param {string} accountData.bankName - The name of the bank
+   * @param {string} accountData.ifscCode - The IFSC code of the bank branch
+   * @param {string} accountData.branch - The branch name
+   * @param {number} [accountData.balance=0] - The initial balance (default: 0)
+   * @param {string} [accountData.currency='INR'] - The currency code (default: 'INR')
+   * @returns {Promise<Object>} The created account
+   */
+  addAccount: async (accountData) => {
+    try {
+      // Set default values if not provided
+      const accountToAdd = {
+        ...accountData,
+        balance: accountData.balance || 0,
+        currency: accountData.currency || 'INR',
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      // Make the API request
+      const response = await api.post('/accounts', accountToAdd);
+      
+      // Return the created account
+      return response;
+    } catch (error) {
+      console.error('Error adding account:', error);
+      throw error;
+    }
+  },
   // Fetch all bank accounts for a user with their cards
   fetchBankAccounts: async (userId) => {
     try {
