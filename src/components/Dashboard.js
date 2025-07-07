@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
 import { menuItems } from '../constants/menuItems';
-import Sidebar from './Sidebar';
+import Sidebar from './sidebar';
 import Header from './Header';
 import './Dashboard.css';
 
