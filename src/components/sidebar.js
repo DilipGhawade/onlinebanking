@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   FaHome,
@@ -55,20 +56,27 @@ const Sidebar = ({ onLogout, onClose, isMobile, activeMenu, setActiveMenu, isCol
     e?.preventDefault();
     e?.stopPropagation();
     
-    if (item?.path) {
-      if (onMenuItemClick) {
-        onMenuItemClick(item.path);
-      } else {
-        setActiveMenu(item.label);
-        navigate(item.path);
-      }
-      
-      // Close sidebar on mobile after navigation
-      if (isMobile && onClose) {
-        onClose(e);
-      }
+    if (!item?.path) return;
+    
+    // Update the active menu
+    setActiveMenu(item.label);
+    
+    // Close sidebar on mobile and collapse on desktop
+    if (isMobile && onClose) {
+      onClose(); // Close sidebar on mobile
+    } else if (!isMobile) {
+      setIsCollapsed(true); // Collapse sidebar on desktop
     }
-  }, [navigate, setActiveMenu, isMobile, onClose, onMenuItemClick]);
+    
+    // Navigate to the selected route
+    navigate(item.path);
+    
+    // Ensure any scroll locks are released on mobile
+    if (isMobile) {
+      document.body.style.overflow = '';
+      document.body.classList.remove('sidebar-open');
+    }
+  }, [navigate, setActiveMenu, isMobile, onClose, setIsCollapsed]);
   
   // Set active menu based on current route on initial load
   useEffect(() => {
@@ -236,6 +244,25 @@ const Sidebar = ({ onLogout, onClose, isMobile, activeMenu, setActiveMenu, isCol
       </div>
     </>
   );
+};
+
+Sidebar.propTypes = {
+  isCollapsed: PropTypes.bool.isRequired,
+  setIsCollapsed: PropTypes.func.isRequired,
+  isMobile: PropTypes.bool.isRequired,
+  isOpen: PropTypes.bool,
+  activeMenu: PropTypes.string.isRequired,
+  setActiveMenu: PropTypes.func.isRequired,
+  onClose: PropTypes.func,
+  onLogout: PropTypes.func,
+  onMenuItemClick: PropTypes.func
+};
+
+Sidebar.defaultProps = {
+  isOpen: false,
+  onClose: () => {},
+  onLogout: () => {},
+  onMenuItemClick: () => {}
 };
 
 export default Sidebar;

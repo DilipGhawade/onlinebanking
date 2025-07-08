@@ -116,11 +116,14 @@
   transition: all 0.2s ease-in-out;
   display: flex;
   align-items: center;
-  padding: 10px 12px;
+  padding: 12px 16px;
   border-radius: 0.25rem;
   margin: 2px 6px;
   text-decoration: none;
   font-size: 0.9rem;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
 
 .sidebar-header {
@@ -138,8 +141,14 @@
 
 /* Hover state for non-active items */
 .menu-item:not(.active):hover {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #1e40af;
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #000000 !important; /* Black text on hover */
+}
+
+/* Ensure text is black on hover */
+.menu-item:not(.active):hover .menu-item-text,
+.menu-item:not(.active):hover .menu-icon {
+  color: #000000 !important; /* Black text and icon on hover */
 }
 
 /* Active state - always show white text */
@@ -161,7 +170,26 @@
   overflow: hidden;
   text-overflow: ellipsis;
   transition: color 0.2s ease-in-out;
+  flex: 1;
 }
+
+/* Menu icon styles */
+.menu-icon {
+  font-size: 1.25rem;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: #9899ac;
+  transition: color 0.2s ease;
+}
+
+/* Active menu item icon */
+.menu-item.active .menu-icon {
+  color: white !important;
+}
+
+/* Hover state for menu item icon - removed as we're using black text on hover */
 
 /* Ensure text stays white on hover for active items */
 .menu-item.active:hover {
@@ -174,8 +202,13 @@
 
 /* Hover state for menu items in collapsed sidebar */
 .sidebar.collapsed:hover .menu-item:not(.active):hover {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #1e40af;
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #000000 !important;
+}
+
+.sidebar.collapsed:hover .menu-item:not(.active):hover .menu-item-text,
+.sidebar.collapsed:hover .menu-item:not(.active):hover .menu-icon {
+  color: #000000 !important;
 }
 
 /* Active menu item in collapsed sidebar when expanded */
@@ -204,13 +237,62 @@
     width: 280px;
     z-index: 1060;
     transition: transform 0.3s ease-in-out;
-    background-color: white;
+    background-color: #1e1e2d; /* Dark background for mobile */
     height: 100vh;
     overflow-y: auto;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     will-change: transform;
     -webkit-overflow-scrolling: touch;
     display: block !important;
+    color: #9899ac; /* Light text color for dark background */
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Ensure sidebar is above main content on mobile */
+  .sidebar {
+    z-index: 1060;
+  }
+  
+  /* Ensure menu item text is visible on mobile */
+  .sidebar .menu-item {
+    color: #9899ac;
+    transition: all 0.2s ease;
+    padding: 12px 16px;
+    margin: 2px 8px;
+  }
+  
+  .sidebar .menu-item-text {
+    color: #9899ac !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    transition: all 0.2s ease;
+    margin-left: 12px;
+    white-space: nowrap;
+  }
+  
+  /* Active menu item styles */
+  .sidebar .menu-item.active {
+    background-color: rgba(37, 99, 235, 0.1);
+  }
+  
+  .sidebar .menu-item.active .menu-item-text,
+  .sidebar .menu-item.active .menu-icon {
+    color: white !important;
+  }
+  
+  /* Hover state for menu items */
+  .sidebar .menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .sidebar .menu-item:hover .menu-item-text,
+  .sidebar .menu-item:hover .menu-icon {
+    color: white !important;
   }
   
   /* Ensure content doesn't scroll when sidebar is open */

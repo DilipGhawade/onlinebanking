@@ -12,7 +12,16 @@ import {
   HiOutlineChevronDown
 } from 'react-icons/hi';
 
-const Header = ({ user, activeMenu, onLogout, isMobile, isSidebarCollapsed, isSidebarOpen, onToggleSidebar, style }) => {
+const Header = ({ 
+  user, 
+  activeMenu, 
+  onLogout, 
+  isMobile, 
+  isSidebarCollapsed, 
+  isSidebarOpen, 
+  onToggleSidebar, 
+  style 
+}) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isMobileState, setIsMobile] = useState(window.innerWidth < 992);
@@ -79,39 +88,75 @@ const Header = ({ user, activeMenu, onLogout, isMobile, isSidebarCollapsed, isSi
     if (showNotifications) setShowNotifications(false);
   };
 
-  const toggleMobileMenu = () => {
-    onToggleSidebar && onToggleSidebar();
+  const toggleMobileMenu = (e) => {
+    console.log('Hamburger clicked');
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      
+      // Prevent any parent click handlers
+      if (e.nativeEvent && e.nativeEvent.stopImmediatePropagation) {
+        e.nativeEvent.stopImmediatePropagation();
+      }
+    }
+    
+    // Call the parent toggle handler
+    if (onToggleSidebar) {
+      onToggleSidebar(e);
+    }
+  };
+
+  // Merge default styles with any provided styles
+  const headerStyle = {
+    width: '100%',
+    height: '70px',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '0 20px',
+    backgroundColor: '#fff',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+    position: 'fixed',
+    top: 0,
+    left: isMobile ? 0 : (isSidebarCollapsed ? '70px' : '250px'),
+    right: 0,
+    zIndex: 900,
+    transition: 'left 0.3s ease',
+    ...style // Spread any additional styles passed from parent
   };
 
   return (
     <header 
-      className="app-header bg-white shadow-sm"
-      style={{
-        position: 'fixed',
-        top: 0,
-        right: 0,
-        height: '70px',
-        zIndex: 100,
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        ...style // Apply the passed style prop last to allow overrides
-      }}
+      className="app-header" 
+      style={headerStyle}
     >
       <div className="container-fluid h-100">
         <div className="header-content h-100 d-flex align-items-center justify-content-between px-4">
           <div className="header-left d-flex align-items-center" style={{ minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
             {isMobile && (
-              <button 
-                className="hamburger-button btn btn-link p-2 me-3"
-                onClick={toggleMobileMenu}
-                aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
-                style={{
-                  color: '#1e1e2d',
-                  fontSize: '1.25rem',
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                {isSidebarOpen ? <HiX size={24} /> : <HiOutlineMenu size={24} />}
-              </button>
+              <div className="hamburger-container" style={{ display: 'flex', alignItems: 'center' }}>
+                <button 
+                  id="hamburger-button"
+                  className="hamburger-button d-lg-none btn btn-icon btn-active-color-primary w-30px h-30px me-2" 
+                  onClick={toggleMobileMenu}
+                  aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
+                  style={{
+                    position: 'relative',
+                    zIndex: 1001,
+                    border: 'none',
+                    background: 'transparent',
+                    padding: '8px',
+                    cursor: 'pointer',
+                    outline: 'none'
+                  }}
+                >
+                  {isSidebarOpen ? (
+                    <HiX size={24} style={{ color: '#1e1e2d' }} />
+                  ) : (
+                    <HiOutlineMenu size={24} style={{ color: '#1e1e2d' }} />
+                  )}
+                </button>
+              </div>
             )}
             <div style={{ 
               flex: '1 1 auto',
@@ -306,31 +351,24 @@ const Header = ({ user, activeMenu, onLogout, isMobile, isSidebarCollapsed, isSi
               )}
             </div>
             
-            <div className="profile-menu" ref={profileMenuRef}>
+            <div className="profile-menu d-flex align-items-center" ref={profileMenuRef}>
               <button 
                 className="btn btn-link p-0 d-flex align-items-center"
                 onClick={toggleProfileMenu}
                 aria-label="User menu"
-                aria-expanded={showProfileMenu}
                 style={{
-                  color: '#5e6278',
-                  textDecoration: 'none',
-                  transition: 'all 0.2s ease',
-                  borderRadius: '0.475rem',
-                  padding: '0.5rem',
-                  border: '1px solid #e4e6ef',
-                  backgroundColor: '#f5f8fa',
-                  minWidth: '36px',
-                  height: '36px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  textDecoration: 'none',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '0.5rem',
+                  borderRadius: '0.475rem'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#eef3f7'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f5f8fa'}
               >
                 <div 
-                  className="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
+                  className="d-flex align-items-center justify-content-center rounded-circle bg-primary text-white"
                   style={{
                     width: '28px',
                     height: '28px',

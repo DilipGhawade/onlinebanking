@@ -40,9 +40,39 @@ function Dashboard() {
   
   // State declarations
   const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(!isMobile);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [activeMenu, setActiveMenu] = useState('Dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Initialize sidebar state based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 992;
+      setIsMobile(mobile);
+      
+      // Reset sidebar state when switching between mobile and desktop
+      if (mobile) {
+        setIsSidebarOpen(false);
+        document.body.classList.remove('sidebar-open');
+      } else {
+        setIsSidebarOpen(true);
+        document.body.classList.add('sidebar-open');
+      }
+    };
+    
+    // Set initial state
+    handleResize();
+    
+    // Add resize event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      document.body.classList.remove('sidebar-open');
+      document.body.style.overflow = '';
+    };
+  }, []);
   
   // Update mobile state on window resize
   useEffect(() => {
@@ -73,13 +103,16 @@ function Dashboard() {
     if (isMobile) {
       if (isSidebarOpen) {
         document.body.classList.add('sidebar-open');
+        document.body.style.overflow = 'hidden';
       } else {
         document.body.classList.remove('sidebar-open');
+        document.body.style.overflow = '';
       }
     }
     
     return () => {
       document.body.classList.remove('sidebar-open');
+      document.body.style.overflow = '';
     };
   }, [isMobile, isSidebarOpen]);
   
@@ -88,24 +121,51 @@ function Dashboard() {
     if (isMobile) {
       setIsSidebarOpen(false);
       document.body.classList.remove('sidebar-open');
+      document.body.style.overflow = '';
+      
+      // Force remove any lingering overlay
+      const overlay = document.querySelector('.sidebar-overlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+    } else {
+      // On desktop, just collapse the sidebar
+      setIsSidebarCollapsed(true);
     }
   }, [isMobile]);
 
   // Toggle sidebar open/closed state
-  const toggleSidebar = useCallback(() => {
-    console.log('Toggling sidebar', { isMobile, currentIsOpen: isSidebarOpen });
+  const toggleSidebar = useCallback((e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     if (isMobile) {
       const newState = !isSidebarOpen;
       setIsSidebarOpen(newState);
+      
+      // Toggle body class and scroll lock for mobile
       if (newState) {
         document.body.classList.add('sidebar-open');
+        document.body.style.overflow = 'hidden';
       } else {
         document.body.classList.remove('sidebar-open');
+        document.body.style.overflow = '';
       }
     } else {
-      setIsSidebarCollapsed(prev => !prev);
+      // Toggle collapsed state for desktop
+      const newCollapsedState = !isSidebarCollapsed;
+      setIsSidebarCollapsed(newCollapsedState);
+      
+      // Update body class for desktop
+      if (newCollapsedState) {
+        document.body.classList.remove('sidebar-open');
+      } else {
+        document.body.classList.add('sidebar-open');
+      }
     }
-  }, [isMobile, isSidebarOpen]);
+  }, [isMobile, isSidebarOpen, isSidebarCollapsed]);
 
   const handleMouseEnter = useCallback(() => {
     if (!isMobile && isSidebarCollapsed) {
@@ -139,40 +199,53 @@ function Dashboard() {
     setActiveMenu(routeName);
   }, [location.pathname, getActiveRouteName]);
   
-  // Handle menu item click
+  // Handle menu item clicks
   const handleMenuItemClick = useCallback((path) => {
-    navigate(path);
-    setActiveMenu(menuItems.find(item => item.path === path)?.label || 'Dashboard');
-    if (isMobile) {
-      setIsSidebarOpen(false);
+    const menuItem = menuItems.find(item => item.path === path);
+    if (menuItem) {
+      setActiveMenu(menuItem.label);
+      
+      // Navigate first
+      navigate(path);
+      
+      // Then close sidebar if on mobile
+      if (isMobile) {
+        // Small timeout to ensure navigation starts before closing
+        setTimeout(() => {
+          closeSidebar();
+        }, 50);
+      }
     }
-  }, [isMobile]);
-  
+  }, [isMobile, navigate, closeSidebar]);
+
   // Close sidebar when clicking outside on mobile
   useEffect(() => {
-    if (!isMobile) return;
+    if (!isMobile || !isSidebarOpen) return;
     
     const handleClickOutside = (event) => {
       const sidebar = document.querySelector('.sidebar');
-      const headerToggle = document.querySelector('.header-toggle');
+      const hamburgerButton = document.getElementById('hamburger-button');
       
-      if (isSidebarOpen && 
-          sidebar && 
-          !sidebar.contains(event.target) && 
-          !(headerToggle && headerToggle.contains(event.target))) {
+      // Check if the click is outside both sidebar and hamburger button
+      const isClickOutside = sidebar && !sidebar.contains(event.target);
+      const isClickOnHamburger = hamburgerButton && hamburgerButton.contains(event.target);
+      
+      if (isClickOutside && !isClickOnHamburger) {
+        console.log('Click outside detected, closing sidebar');
         closeSidebar();
       }
     };
-
-    // Add both mousedown and touchstart for better mobile support
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('touchstart', handleClickOutside);
+    
+    // Use a small timeout to ensure this runs after the click that opened the sidebar
+    const timer = setTimeout(() => {
+      document.addEventListener('click', handleClickOutside, true);
+    }, 10);
     
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
+      clearTimeout(timer);
+      document.removeEventListener('click', handleClickOutside, true);
     };
-  }, [isMobile, closeSidebar, isSidebarOpen]);
+  }, [isMobile, isSidebarOpen, closeSidebar]);
   
   // Close sidebar when route changes on mobile
   useEffect(() => {
@@ -223,186 +296,180 @@ function Dashboard() {
     return null; // The auth flow will handle the redirect
   }
 
-  // Sidebar style based on state
-  const sidebarStyle = {
-    width: isMobile ? '250px' : (isSidebarCollapsed ? '70px' : '250px'),
-    height: '100vh',
-    position: 'fixed',
-    top: 0,
-    left: isMobile ? (isSidebarOpen ? '0' : '-250px') : '0',
-    zIndex: 1002, // Higher than header to stay on top
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    backgroundColor: '#1e1e2d',
-    boxShadow: isMobile && isSidebarOpen ? '8px 0 15px 0 rgba(0,0,0,0.1)' : 'none',
-    overflowY: 'auto',
-    padding: '1rem 0',
-    color: '#9899ac',
-    display: 'block',
-    visibility: 'visible',
-    opacity: 1,
-    transform: 'translateX(0)',
-    overflowX: 'hidden' // Prevent horizontal scrollbar
-  };
+  // Calculate sidebar width based on collapsed state
+  const sidebarWidth = isSidebarCollapsed ? 70 : 250;
   
-  // Sidebar width
-  const sidebarWidth = isMobile ? '250px' : (isSidebarCollapsed ? '70px' : '250px');
-  
-  // Header style - positioned to the right of the sidebar
-  const headerStyle = {
-    position: 'fixed',
-    top: 0,
-    left: isMobile ? '0' : sidebarWidth,
-    right: 0,
-    height: '70px',
-    zIndex: 1001, // Below sidebar but above content
-    transition: isMobile ? 'none' : 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    backgroundColor: '#fff',
-    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-    display: 'flex',
-    alignItems: 'center',
-    padding: '0 1.5rem',
-    margin: 0,
-    boxSizing: 'border-box',
-    overflow: 'hidden',
-    width: isMobile ? '100%' : `calc(100% - ${isSidebarCollapsed ? '70px' : '250px'})`,
-    marginLeft: '0' // Ensure no extra margin on the left
-  };
-  
-  // Main content style - positioned below header and to the right of sidebar
-  const mainContentStyle = {
-    position: 'absolute',
-    left: isMobile ? '0' : (isSidebarCollapsed ? '70px' : '250px'),
-    right: '0',
-    top: '70px',
-    bottom: '0',
-    padding: '1rem',
-    backgroundColor: '#f5f7fa',
-    transition: isMobile ? 'none' : 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    overflowX: 'hidden',
-    overflowY: 'auto',
-    boxSizing: 'border-box',
-    margin: 0
-  };
-
   return (
-    <div className="app-container" style={{ 
+    <div className={`app-wrapper ${isSidebarOpen ? 'sidebar-open' : ''}`} style={{
+      display: 'flex',
       minHeight: '100vh',
       position: 'relative',
-      width: '100%',
-      overflowX: 'hidden',
-      backgroundColor: '#f5f7fa',
-      display: 'flex',
-      flexDirection: 'column'
+      backgroundColor: '#f8f9fa',
+      margin: 0,
+      padding: 0,
+      overflow: 'hidden',
+      paddingLeft: isMobile ? 0 : `${sidebarWidth}px`,
+      transition: 'padding-left 0.3s ease',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0
     }}>
+      {/* Sidebar Overlay - Only shown on mobile */}
+      {isMobile && (
+        <div 
+          className="sidebar-overlay"
+          onClick={closeSidebar}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 999,
+            opacity: isSidebarOpen ? 1 : 0,
+            visibility: isSidebarOpen ? 'visible' : 'hidden',
+            transition: 'opacity 0.3s ease, visibility 0.3s ease',
+            pointerEvents: isSidebarOpen ? 'auto' : 'none'
+          }}
+        />
+      )}
+      
       {/* Sidebar */}
-      <aside 
-        className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''}`}
-        style={sidebarStyle}
-        onMouseEnter={!isMobile ? handleMouseEnter : undefined}
-        onMouseLeave={!isMobile ? handleMouseLeave : undefined}
+      <div className={`sidebar ${isSidebarCollapsed ? 'collapsed' : ''} ${isMobile ? 'mobile' : ''}`} 
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          bottom: 0,
+          width: `${sidebarWidth}px`,
+          zIndex: 1000,
+          transition: isMobile ? 'transform 0.3s ease' : 'all 0.3s ease',
+          transform: isMobile ? (isSidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'none',
+          boxSizing: 'border-box',
+          overflow: 'hidden'
+        }}
       >
         <Sidebar 
-          onLogout={handleLogout}
-          onClose={closeSidebar}
+          isCollapsed={isSidebarCollapsed} 
+          setIsCollapsed={setIsSidebarCollapsed}
           isMobile={isMobile}
+          isOpen={isSidebarOpen}
           activeMenu={activeMenu}
           setActiveMenu={setActiveMenu}
-          isCollapsed={isSidebarCollapsed}
-          setIsCollapsed={setIsSidebarCollapsed}
-          onMenuItemClick={handleMenuItemClick}
-        />
-      </aside>
-      
-      {/* Header - positioned to the right of sidebar */}
-      <div style={headerStyle}>
-        <Header 
-          user={user} 
-          activeMenu={activeMenu}
+          onClose={closeSidebar}
           onLogout={handleLogout}
-          isMobile={isMobile}
-          isSidebarCollapsed={isSidebarCollapsed}
-          isSidebarOpen={isSidebarOpen}
-          onToggleSidebar={toggleSidebar}
         />
       </div>
       
-      {/* Main content wrapper */}
-      <div style={{
-        ...mainContentStyle,
-        padding: '1.5rem',
-        paddingBottom: '20px',
-        minHeight: 'calc(100vh - 70px)'
+      <div className="main-content-wrapper" style={{
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        position: 'relative',
+        minHeight: '100vh',
+        backgroundColor: '#f8f9fa',
+        transition: isMobile ? 'transform 0.3s ease' : 'padding 0.3s ease',
+        transform: isMobile && isSidebarOpen ? 'translateX(250px)' : 'none',
+        padding: isMobile ? '90px 20px 20px 20px' : '90px 20px 20px 20px',
+        boxSizing: 'border-box',
+        overflowX: 'hidden',
+        marginTop: 0,
+        maxWidth: '100%',
+        overflowY: 'auto',
+        height: '100vh',
+        marginLeft: isMobile ? 0 : `-${sidebarWidth}px`,
+        paddingLeft: isMobile ? '20px' : `calc(20px + ${sidebarWidth}px)`
       }}>
-        {/* <div style={{
-          width: '100%',
-          height: '100%',
-          backgroundColor: '#fff',
-          borderRadius: '8px',
-          boxShadow: '0 0.125rem 0.25rem rgba(0, 0, 0, 0.075)'
-        }}> */}
-          {/* Page content */}
-          <div style={{
-            width: '100%',
-            maxWidth: '100%',
-            margin: 0,
-            padding: '1.5rem'
-          }}>
-            <ErrorBoundary>
-              <Routes>
-                <Route index element={<Navigate to="dashboard" replace />} />
-                <Route 
-                  path="dashboard" 
-                  element={
-                    <DashboardPage onNavigate={() => setActiveMenu('Dashboard')} />
-                  } 
-                />
-                <Route 
-                  path="transactions" 
-                  element={
-                    <TransactionsPage onNavigate={() => setActiveMenu('Transactions')} />
-                  } 
-                />
-                <Route 
-                  path="accounts" 
-                  element={
-                    <AccountsPage onNavigate={() => setActiveMenu('Accounts')} />
-                  } 
-                />
-                <Route 
-                  path="creditcards" 
-                  element={
-                    <CreditCardsPage onNavigate={() => setActiveMenu('Credit Cards')} />
-                  } 
-                />
-                <Route 
-                  path="loans" 
-                  element={
-                    <LoansPage onNavigate={() => setActiveMenu('Loans')} />
-                  } 
-                />
-                <Route 
-                  path="services" 
-                  element={
-                    <ServicesPage onNavigate={() => setActiveMenu('Services')} />
-                  } 
-                />
-                <Route 
-                  path="investments" 
-                  element={
-                    <InvestmentsPage onNavigate={() => setActiveMenu('Investments')} />
-                  } 
-                />
-                <Route 
-                  path="settings" 
-                  element={
-                    <SettingPage onNavigate={() => setActiveMenu('Settings')} />
-                  } 
-                />
-                <Route path="*" element={<Navigate to="/dashboard" replace />} />
-              </Routes>
-            </ErrorBoundary>
-          </div>
-        {/* </div> */}
+        {/* Header - fixed at the top */}
+        <Header 
+          onClose={closeSidebar}
+          isMobile={isMobile}
+          activeMenu={activeMenu}
+          isCollapsed={isSidebarCollapsed}
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={toggleSidebar}
+          user={user}
+          onLogout={handleLogout}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: isMobile ? 0 : `${sidebarWidth}px`,
+            right: 0,
+            height: '70px',
+            backgroundColor: '#fff',
+            zIndex: 900,
+            transition: 'left 0.3s ease',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+          }}
+        />
+        
+        {/* Main content area */}
+        <div style={{
+          padding: '20px',
+          paddingTop: '90px', // Space for the fixed header
+          flex: 1,
+          overflowY: 'auto',
+          minHeight: '100vh',
+          position: 'relative',
+          zIndex: 800
+        }}>
+        <ErrorBoundary>
+          <Routes>
+            <Route 
+              path="/" 
+              element={
+                <DashboardPage onNavigate={() => setActiveMenu('Dashboard')} />
+              } 
+            />
+            <Route 
+              path="transactions" 
+              element={
+                <TransactionsPage onNavigate={() => setActiveMenu('Transactions')} />
+              } 
+            />
+            <Route 
+              path="accounts" 
+              element={
+                <AccountsPage onNavigate={() => setActiveMenu('Accounts')} />
+              } 
+            />
+            <Route 
+              path="credit-cards" 
+              element={
+                <CreditCardsPage onNavigate={() => setActiveMenu('Credit Cards')} />
+              } 
+            />
+            <Route 
+              path="loans" 
+              element={
+                <LoansPage onNavigate={() => setActiveMenu('Loans')} />
+              } 
+            />
+            <Route 
+              path="services" 
+              element={
+                <ServicesPage onNavigate={() => setActiveMenu('Services')} />
+              } 
+            />
+            <Route 
+              path="investments" 
+              element={
+                <InvestmentsPage onNavigate={() => setActiveMenu('Investments')} />
+              } 
+            />
+            <Route 
+              path="settings" 
+              element={
+                <SettingPage onNavigate={() => setActiveMenu('Settings')} />
+              } 
+            />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </ErrorBoundary>
+        </div>
       </div>
     </div>
   );
