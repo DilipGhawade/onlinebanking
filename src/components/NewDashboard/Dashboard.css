@@ -19,17 +19,74 @@
   display: flex;
   min-height: 100vh;
   background-color: var(--bg-color);
+  position: relative;
 }
 
 .main-content {
-  margin-left: var(--sidebar-width);
+  margin-left: var(--sidebar-collapsed-width);
   transition: margin-left var(--transition-speed) ease;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-x: auto;
+  flex: 1;
+  width: calc(100% - var(--sidebar-collapsed-width));
   padding-top: var(--header-height);
+  position: relative;
+  z-index: 1;
+}
+
+/* Adjust content when sidebar is expanded */
+.dashboard-container:not(.collapsed) .main-content {
+  margin-left: var(--sidebar-width);
   width: calc(100% - var(--sidebar-width));
+}
+
+/* Full width on mobile */
+@media (max-width: 1199px) {
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+}
+
+/* Expanded state */
+.dashboard-container:not(.collapsed) .main-content {
+  margin-left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+}
+
+/* Responsive styles */
+@media (max-width: 1199px) {
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  
+  .dashboard-container.collapsed .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+}
+
+/* Ensure proper transition for the header */
+.top-header {
+  transition: left var(--transition-speed) ease, width var(--transition-speed) ease;
+}
+
+/* Fix for main content when hovering over collapsed sidebar */
+.dashboard-container.collapsed .sidebar:hover ~ .main-content {
+  margin-left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+}
+
+/* Ensure proper z-index for sidebar and content */
+.sidebar {
+  z-index: 1000;
+}
+
+.main-content {
+  position: relative;
+  z-index: 1;
 }
 
 /* Header */
@@ -39,13 +96,149 @@
   box-shadow: var(--shadow);
   position: fixed;
   top: 0;
-  left: var(--sidebar-width);
+  left: var(--sidebar-collapsed-width);
   right: 0;
   z-index: 1000;
   display: flex;
   align-items: center;
+  padding: 0 1.5rem;
+  transition: left var(--transition-speed) ease, width var(--transition-speed) ease;
+}
+
+/* Adjust header position when sidebar is collapsed */
+.dashboard-container:not(.collapsed) .top-header {
+  left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+}
+
+/* Adjust header for mobile */
+@media (max-width: 1199px) {
+  .top-header {
+    left: 0 !important;
+    width: 100% !important;
+    padding-left: 1rem;
+  }
+}
+
+/* Expanded header state */
+.dashboard-container:not(.collapsed) .top-header {
+  left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+}
+
+/* Responsive header */
+@media (max-width: 1199px) {
+  .top-header {
+    left: 0 !important;
+    width: 100% !important;
+  }
+}
+
+/* Header Content */
+.header-content {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: 0;
+  width: 100%;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.menu-toggle-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Menu Toggle Button */
+.menu-toggle {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: none; /* Hide by default */
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  margin-right: 1rem;
+}
+
+/* Show menu toggle only on mobile */
+@media (max-width: 1199px) {
+  .menu-toggle {
+    display: flex;
+  }
+}
+
+.menu-toggle:hover {
+  background: var(--primary-light);
+  color: var(--primary-color);
+}
+
+.menu-toggle:active {
+  transform: scale(0.95);
+}
+
+/* Tooltip styling */
+.menu-toggle::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.menu-toggle:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(12px);
+}
+
+/* Different states */
+.menu-toggle.active {
+  background-color: var(--primary-light);
+  color: var(--primary-color);
+}
+
+.menu-toggle.collapsed,
+.menu-toggle.expanded {
+  display: flex;
+}
+
+/* Show tooltip only on desktop */
+@media (max-width: 991.98px) {
+  .menu-toggle::after {
+    display: none;
+  }
+}
+
+.menu-toggle:hover {
+  background-color: var(--bg-color);
+}
+
+.top-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-color);
 }
 
 .header-content {
@@ -178,7 +371,6 @@
   
   .content-wrapper {
     padding: 1rem;
-    margin-top: var(--header-height);
   }
 }
 
