@@ -57,34 +57,42 @@ const Dashboard = () => {
     // Initial check
     handleResize();
     
-    // Add event listener
-    window.addEventListener('resize', handleResize);
+    // Add event listener with debounce
+    let resizeTimer;
+    const debouncedResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(handleResize, 100);
+    };
+    
+    window.addEventListener('resize', debouncedResize);
     
     // Cleanup
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', debouncedResize);
+      clearTimeout(resizeTimer);
       document.body.classList.remove('sidebar-open');
     };
   }, [isMobileMenuOpen]);
 
-  // Close sidebar when route changes on mobile
   useEffect(() => {
     if (isMobile) {
       setIsMobileMenuOpen(false);
       document.body.classList.remove('sidebar-open');
     }
-  }, [location.pathname, isMobile]);
+  }, [location.pathname]);
 
   const toggleSidebar = () => {
     if (isMobile) {
-      // On mobile, toggle the mobile menu
       const newState = !isMobileMenuOpen;
       setIsMobileMenuOpen(newState);
+      document.body.style.overflow = newState ? 'hidden' : '';
       document.body.classList.toggle('sidebar-open', newState);
     } else {
-      // On desktop, toggle the collapsed state
       const newState = !isSidebarCollapsed;
       setIsSidebarCollapsed(newState);
+      if (newState === false) {
+        setIsSidebarOpen(true);
+      }
     }
   };
 
@@ -107,11 +115,10 @@ const Dashboard = () => {
   return (
     <div className={`dashboard-container ${isSidebarCollapsed ? 'collapsed' : ''}`}>
       <NewSidebar 
-        isOpen={isSidebarOpen} 
-        onLogout={handleLogout}
         isCollapsed={isSidebarCollapsed}
-        onToggleCollapse={toggleSidebar}
+        onToggleCollapse={setIsSidebarCollapsed}
         onMenuItemClick={handleMenuItemClick}
+        onLogout={handleLogout}
       />
       
       <main className="main-content">

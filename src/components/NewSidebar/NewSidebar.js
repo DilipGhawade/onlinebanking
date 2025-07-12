@@ -58,12 +58,14 @@ const NewSidebar = ({ onLogout, isCollapsed, onToggleCollapse, onMenuItemClick }
       
       if (isMobileView) {
         setIsOpen(false);
+        document.body.classList.remove('sidebar-open');
       } else {
         // On desktop, ensure it's open when resizing from mobile
         if (isCollapsed && isMobile) {
           onToggleCollapse?.(false);
         }
         setIsOpen(true);
+        document.body.classList.remove('sidebar-open');
       }
     };
 
@@ -88,16 +90,24 @@ const NewSidebar = ({ onLogout, isCollapsed, onToggleCollapse, onMenuItemClick }
 
   // Toggle mobile menu
   const toggleMobileMenu = () => {
-    if (isMobile) {
-      setIsOpen(!isOpen);
-    } else {
+    if (!isMobile) {
       onToggleCollapse?.(!isCollapsed);
+      return;
     }
+    
+    const willOpen = !isOpen;
+    setIsOpen(willOpen);
+    
+    // Toggle body scroll
+    document.body.style.overflow = willOpen ? 'hidden' : '';
   };
 
-  const closeMobileMenu = () => {
-    if (isMobile) {
+  // Close mobile menu when clicking outside
+  const closeMobileMenu = (e) => {
+    if (isMobile && isOpen) {
+      e?.stopPropagation();
       setIsOpen(false);
+      document.body.style.overflow = '';
     }
   };
 
@@ -123,20 +133,17 @@ const NewSidebar = ({ onLogout, isCollapsed, onToggleCollapse, onMenuItemClick }
       </button>
 
       {/* Overlay */}
-      {isMobile && isOpen && (
-        <div 
-          className="sidebar-overlay" 
-          onClick={closeMobileMenu}
-          aria-hidden="true"
-        />
-      )}
+      <div 
+        className={`sidebar-overlay ${isOpen ? 'open' : ''}`}
+        onClick={closeMobileMenu}
+        aria-hidden="true"
+      />
 
       {/* Sidebar */}
       <aside 
-        className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobile ? 'mobile' : ''} ${isOpen ? 'open' : ''}`}
-        aria-label="Main navigation"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        className={`sidebar ${isMobile ? (isOpen ? 'open' : '') : (isCollapsed ? 'collapsed' : '')}`}
+        onMouseEnter={!isMobile ? handleMouseEnter : undefined}
+        onMouseLeave={!isMobile ? handleMouseLeave : undefined}
       >
         <div className="sidebar-header">
           <div className="logo-container">
@@ -196,4 +203,4 @@ const NewSidebar = ({ onLogout, isCollapsed, onToggleCollapse, onMenuItemClick }
   );
 };
 
-export default NewSidebar;
+export default React.memo(NewSidebar);
