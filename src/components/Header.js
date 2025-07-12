@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
 import { 
@@ -37,16 +37,23 @@ const Header = ({
       const isMobileView = window.innerWidth < 992;
       setIsMobile(isMobileView);
       
-      if (isMobileView && (showNotifications || showProfileMenu)) {
+      // Close dropdowns when switching to mobile
+      if (isMobileView) {
         setShowNotifications(false);
         setShowProfileMenu(false);
       }
     };
 
+    // Initial check
+    handleResize();
+    
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [showNotifications, showProfileMenu]);
+  }, []);
 
+  // Get current location to detect route changes
+  const location = useLocation();
+  
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -58,6 +65,7 @@ const Header = ({
       }
     };
 
+    // Add both mousedown and touchstart for better mobile support
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside);
     
@@ -66,16 +74,26 @@ const Header = ({
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, []);
-
-  // Close dropdowns when navigating
+  
+  // Close dropdowns when route changes
   useEffect(() => {
     setShowNotifications(false);
     setShowProfileMenu(false);
-  }, [navigate]);
+  }, [location.pathname]);
 
+  // Handle logout
   const handleLogout = () => {
-    dispatch(logout());
-    navigate('/login');
+    // Close any open dropdowns
+    setShowProfileMenu(false);
+    setShowNotifications(false);
+    
+    // Execute logout
+    if (onLogout) {
+      onLogout();
+    } else {
+      dispatch(logout());
+      navigate('/login');
+    }
   };
 
   const toggleNotifications = () => {
@@ -88,41 +106,34 @@ const Header = ({
     if (showNotifications) setShowNotifications(false);
   };
 
-  const toggleMobileMenu = (e) => {
-    console.log('Hamburger clicked');
+  // Toggle sidebar - only for desktop
+  const toggleSidebar = (e) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
-      e.nativeEvent.stopImmediatePropagation();
-      
-      // Prevent any parent click handlers
-      if (e.nativeEvent && e.nativeEvent.stopImmediatePropagation) {
-        e.nativeEvent.stopImmediatePropagation();
-      }
     }
     
-    // Call the parent toggle handler
-    if (onToggleSidebar) {
+    if (!isMobile && onToggleSidebar) {
       onToggleSidebar(e);
     }
   };
 
   // Merge default styles with any provided styles
   const headerStyle = {
-    width: '100%',
+    width: isMobile ? 'calc(100% - 70px)' : '100%',
     height: '70px',
     display: 'flex',
     alignItems: 'center',
-    padding: '0 20px',
     backgroundColor: '#fff',
     boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
     position: 'fixed',
     top: 0,
-    left: isMobile ? 0 : (isSidebarCollapsed ? '70px' : '250px'),
+    left: isMobile ? '70px' : (isSidebarCollapsed ? '70px' : '250px'),
     right: 0,
-    zIndex: 900,
-    transition: 'left 0.3s ease',
-    ...style // Spread any additional styles passed from parent
+    zIndex: 1050,
+    transition: isMobile ? 'none' : 'left 0.3s ease',
+    ...style,
+    overflow: 'visible'
   };
 
   return (
@@ -130,39 +141,13 @@ const Header = ({
       className="app-header" 
       style={headerStyle}
     >
-      <div className="container-fluid h-100">
-        <div className="header-content h-100 d-flex align-items-center justify-content-between px-4">
+      <div className="container-fluid h-100" style={{ padding: 0 }}>
+        <div className="header-content h-100 d-flex align-items-center justify-content-between" style={{ padding: '0 1rem' }}>
           <div className="header-left d-flex align-items-center" style={{ minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
-            {isMobile && (
-              <div className="hamburger-container" style={{ display: 'flex', alignItems: 'center' }}>
-                <button 
-                  id="hamburger-button"
-                  className="hamburger-button d-lg-none btn btn-icon btn-active-color-primary w-30px h-30px me-2" 
-                  onClick={toggleMobileMenu}
-                  aria-label={isSidebarOpen ? 'Close menu' : 'Open menu'}
-                  style={{
-                    position: 'relative',
-                    zIndex: 1001,
-                    border: 'none',
-                    background: 'transparent',
-                    padding: '8px',
-                    cursor: 'pointer',
-                    outline: 'none'
-                  }}
-                >
-                  {isSidebarOpen ? (
-                    <HiX size={24} style={{ color: '#1e1e2d' }} />
-                  ) : (
-                    <HiOutlineMenu size={24} style={{ color: '#1e1e2d' }} />
-                  )}
-                </button>
-              </div>
-            )}
             <div style={{ 
               flex: '1 1 auto',
-              minWidth: 0,
-              padding: '0 1rem',
-              maxWidth: 'calc(100vw - 300px)', // Adjust based on your layout
+              padding: 0,
+              maxWidth: '100%',
               overflow: 'hidden',
               position: 'relative',
               zIndex: 1
@@ -176,7 +161,7 @@ const Header = ({
                   textOverflow: 'ellipsis',
                   width: '100%',
                   margin: 0,
-                  fontSize: '1.25rem',
+                  fontSize: isMobile ? '1.1rem' : '1.25rem',
                   lineHeight: '1.2',
                   padding: '0.5rem 0',
                   display: 'inline-block',
@@ -296,16 +281,6 @@ const Header = ({
                           </div>
                         </div>
                         <div className="flex-grow-1">
-                          <h6 
-                            className="mb-1" 
-                            style={{ 
-                              color: '#181c32',
-                              fontSize: '0.925rem',
-                              fontWeight: '500'
-                            }}
-                          >
-                            Notification {item}
-                          </h6>
                           <p 
                             className="mb-1" 
                             style={{
@@ -351,7 +326,17 @@ const Header = ({
               )}
             </div>
             
-            <div className="profile-menu d-flex align-items-center" ref={profileMenuRef}>
+            <div 
+              className="profile-menu d-flex align-items-center" 
+              ref={profileMenuRef}
+              style={{
+                position: 'relative',
+                zIndex: 1051, // Ensure profile menu is above the header
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
               <button 
                 className="btn btn-link p-0 d-flex align-items-center"
                 onClick={toggleProfileMenu}
@@ -403,7 +388,18 @@ const Header = ({
                     borderRadius: '0.475rem',
                     boxShadow: '0 0 50px 0 rgba(82, 63, 105, 0.15)',
                     padding: '1rem 0',
-                    marginTop: '0.5rem'
+                    position: 'fixed', // Changed from 'absolute' to 'fixed' to ensure it stays in view
+                    right: '20px', // Add some spacing from the right edge
+                    top: '75px', // Position below the header
+                    zIndex: 9999,
+                    backgroundColor: '#fff',
+                    display: 'block',
+                    opacity: 1,
+                    visibility: 'visible',
+                    margin: 0,
+                    // Ensure dropdown is not clipped by parent containers
+                    willChange: 'transform',
+                    transform: 'translate3d(0, 0, 0)'
                   }}
                 >
                   <div className="px-5 py-3">

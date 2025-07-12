@@ -5,7 +5,7 @@ import store from './app/store';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import Login from './components/Login';
-import Dashboard from './components/Dashboard';
+import Dashboard from './components/NewDashboard/Dashboard';
 import ProtectedRoute from './routes/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 

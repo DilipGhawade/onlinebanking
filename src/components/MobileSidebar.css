@@ -1,0 +1,366 @@
+/* Mobile Sidebar Styles */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 70px;
+  background: #1e1e2d;
+  color: #fff;
+  z-index: 1000;
+  transition: all 0.3s ease-in-out;
+  overflow-y: auto;
+  padding-top: 20px;
+}
+
+/* Expanded state for mobile */
+.sidebar.mobile {
+  width: 250px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Collapsed state for desktop */
+.sidebar.collapsed {
+  width: 70px;
+}
+
+/* Sidebar header for mobile */
+.sidebar-header {
+  padding: 10px 15px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #2b2b40;
+  display: none; /* Hidden by default */
+}
+
+.sidebar.mobile .sidebar-header {
+  display: flex; /* Show on mobile when expanded */
+}
+
+/* Menu items */
+.sidebar-nav {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.sidebar-nav ul {
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-nav li {
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  color: #9899ac;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+  background-color: #2b2b40;
+  color: #fff;
+}
+
+.sidebar-nav a.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #3699ff;
+}
+
+.menu-icon {
+  margin-right: 12px;
+  font-size: 1.2rem;
+  min-width: 24px;
+  text-align: center;
+}
+
+.menu-text {
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Collapsed state */
+.sidebar.collapsed .menu-text {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.sidebar.collapsed .menu-icon {
+  margin-right: 0;
+  font-size: 1.5rem;
+}
+
+.sidebar.collapsed a {
+  justify-content: center;
+  padding: 15px 0;
+}
+
+/* Mobile specific styles */
+@media (max-width: 991px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: 250px;
+  }
+  
+  .sidebar.mobile {
+    transform: translateX(0);
+  }
+  
+  .sidebar.collapsed {
+    width: 70px;
+    transform: translateX(0);
+  }
+  
+  .sidebar.collapsed .menu-text,
+  .sidebar.collapsed .sidebar-header {
+    display: none;
+  }
+  
+  .sidebar.collapsed a {
+    justify-content: center;
+    padding: 15px 0;
+  }
+  
+  .sidebar.collapsed .menu-icon {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+}
+
+/* Sidebar footer */
+.sidebar-footer {
+  margin-top: auto;
+  padding: 15px;
+  border-top: 1px solid #2b2b40;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  color: #9899ac;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  padding: 10px 15px;
+  border-radius: 4px;
+}
+
+.logout-button:hover {
+  background-color: #2b2b40;
+  color: #fff;
+}
+
+/* Mobile close button */
+.mobile-close-button {
+  background: none;
+  border: none;
+  color: #6c7293;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.mobile-close-button:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Collapse toggle button */
+.collapse-toggle {
+  position: absolute;
+  bottom: 20px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #6c7293;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  z-index: 1001;
+}
+
+.collapse-toggle:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Overlay for mobile */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.sidebar-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Responsive adjustments */
+@media (min-width: 992px) {
+  .sidebar-overlay {
+    display: none;
+  }
+  
+  .mobile-close-button {
+    display: none;
+  }
+  
+  .sidebar {
+    transform: translateX(0) !important;
+  }
+}
+
+/* Menu items */
+.sidebar-nav li {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.sidebar-wrapper.mobile .menu-item-icon {
+  margin-right: 0 !important;
+  font-size: 1.5rem;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.sidebar-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.mobile-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 10px;
+}
+
+.mobile-sidebar-header h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+.close-sidebar {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 5px;
+}
+
+/* Responsive adjustments */
+@media (min-width: 992px) {
+  .mobile-menu-toggle,
+  .sidebar-overlay {
+    display: none;
+  }
+  
+  .sidebar-wrapper {
+    transform: translateX(0);
+    width: 250px;
+  }
+  
+  .sidebar-wrapper.collapsed {
+    width: 70px;
+  }
+  
+  .sidebar-wrapper.collapsed .menu-item-text,
+  .sidebar-wrapper.collapsed .sidebar-header h1 {
+    display: none;
+  }
+  
+  .sidebar-wrapper.collapsed .menu-item {
+    justify-content: center;
+    padding: 12px 0;
+  }
+  
+  .sidebar-wrapper.collapsed .menu-item-icon {
+    margin-right: 0 !important;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 991px) {
+  .sidebar-wrapper.mobile {
+    transform: translateX(-100%);
+    width: 70px !important;
+    z-index: 1000;
+  }
+  
+  .sidebar-wrapper.mobile.open {
+    transform: translateX(0);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .sidebar-wrapper.mobile .sidebar {
+    width: 100% !important;
+    height: 100%;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Adjust main content when mobile sidebar is open */
+  .main-content-wrapper {
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .sidebar-wrapper.mobile.open + .main-content-wrapper {
+    transform: translateX(70px);
+  }
+  
+  /* Header adjustments for mobile */
+  .header {
+    z-index: 997 !important;
+    position: fixed !important;
+    top: 0;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    transition: none;
+  }
+}
